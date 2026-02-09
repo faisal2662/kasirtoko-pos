@@ -9,13 +9,21 @@
         </ol>
     </nav>
 
+
+
     <section class="section">
         <div class="row">
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-body">
+                        <div class="row mt-3 justify-content-end">
+                            <div class="col-3">
+
+                                <a href="{{ route('product.add') }}" class="float-end btn btn-sm btn-primary mb-2">Tambah
+                                    Data</a>
+                            </div>
+                        </div>
                         <h5 class="card-title">Data Barang</h5>
-                        <a href="/dashboard/product-add" class="btn btn-primary mb-2">Tambah Data</a>
                         @if (session()->has('success'))
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 {{ session('success') }}
@@ -24,7 +32,7 @@
                             </div>
                         @endif
                         <!-- Table with stripped rows -->
-                        <table class="table datatable">
+                        <table class="table " id="table-product">
                             <thead>
                                 <tr>
                                     <th scope="col">No.</th>
@@ -36,23 +44,7 @@
                                     <th scope="col">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @foreach ($products as $item)
-                                    <tr>
-                                        <th scope="row">{{ $loop->iteration }}</th>
-                                        <td>{{ $item->name_product }}</td>
-                                        <td>{{ $item->category->name }}</td>
-                                        <td>@currency($item->unit_price)</td>
-                                        <td>{{ $item->short }}</td>
-                                        <td>{{ $item->stock }}</td>
-                                        <td><a href="product-edit/{{ $item->slug }}" class="btn btn-warning">Ubah</a>
-                                            || <a data-bs-toggle="modal" data-bs-target="#deleteProduct{{ $item->slug }}"
-                                                href="" class="btn btn-danger">Hapus</a>
-                                        </td>
-                                    </tr>
-                                @endforeach
 
-                            </tbody>
                         </table>
                         <!-- End Table with stripped rows -->
 
@@ -64,7 +56,7 @@
     </section>
 
     {{-- modal delete --}}
-    @foreach ($products as $item)
+    {{-- @foreach ($products as $item)
         <div class="modal" id="deleteProduct{{ $item->slug }}" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -80,5 +72,44 @@
             </div>
         </div>
         <!-- End Vertically centered Modal-->
-    @endforeach
+    @endforeach --}}
+@endsection
+
+@section('script')
+    <script>
+        var table = null;
+        $(document).ready(function() {
+            table = $('#table-product').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('product.datatable') }}",
+                    type: 'GET',
+                },
+                columns: [{
+                        data: 'no'
+                    },
+                    {
+                        data: 'name'
+                    },
+                    {
+                        data: 'categories_name'
+                    },
+                    {
+                        data: 'price'
+                    },
+                    {
+                        data: 'short'
+                    },
+                    {
+                        data: 'stock'
+                    },
+                    {
+                        data: 'action'
+                    }
+
+                ]
+            });
+        });
+    </script>
 @endsection

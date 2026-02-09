@@ -14,6 +14,11 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-body">
+                        <div class="row justify-content-end mt-3">
+                            <div class="col-3">
+                                <a href="{{ route('product.add') }}" class="float-end btn btn-sm btn-primary">Tambah Data</a>
+                            </div>
+                        </div>
                         <h5 class="card-title">Data Barang</h5>
                         {{-- <a href="/dashboard/product-add" class="btn btn-primary mb-2">Tambah Data</a> --}}
                         @if (session()->has('success'))
@@ -120,7 +125,7 @@
         <!-- End Vertically centered Modal-->
     @endforeach
 
-    {{-- 
+    {{--
     @foreach ($products as $item)
         <!-- Modal Dialog Scrollable -->
 

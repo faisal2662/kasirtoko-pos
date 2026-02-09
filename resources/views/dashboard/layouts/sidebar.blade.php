@@ -61,7 +61,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/dashboard/product" class="{{ Request::is('dashboard/product') ? 'active' : '' }}">
+                    <a href="{{ route('product') }}" class="{{ Request::is('dashboard/product') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Daftar Barang</span>
                     </a>
                 </li>

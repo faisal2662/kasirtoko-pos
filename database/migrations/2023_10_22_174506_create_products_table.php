@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('code_product',10)->unique();
             $table->string('name',50);
-            $table->string('category_id',10);
-            $table->foreign('category_id')->references('code_category')->on('categories');
+            $table->unsignedBigInteger('category_id');
+            $table->foreign('category_id')->references('id')->on('categories');
             $table->integer('price');
             $table->integer('stock')->nullable();
             $table->timestamps();

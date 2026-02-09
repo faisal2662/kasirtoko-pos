@@ -5,7 +5,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
-            <li class="breadcrumb-item">Barang</li>
+            <li class="breadcrumb-item"><a href="{{ route('product') }}">Barang</a></li>
             <li class="breadcrumb-item active">Tambah - Barang</li>
         </ol>
     </nav>
@@ -15,7 +15,7 @@
             <section class="section">
                 <div class="card">
                     <div class="card-body">
-                        <a href="/dashboard/product" class="btn btn-secondary"
+                        <a href="{{ route('product') }}" class="btn btn-secondary"
                             style="float: right; margin-top:30px;">Kembali</a>
                         <div class="card-title">Data Barang</div>
                         @if (session()->has('success'))
@@ -34,35 +34,34 @@
                                 </ul>
                             </div>
                         @endif
-                        @foreach ($products as $item)
-                            <form action="/dashboard/product-edit/{{ $item->slug }}" method="POST">
+
+                            <form action="{{ route('product.update', $product->id) }}" method="POST">
                                 @csrf
                                 @method('put')
                                 <div class="mb-3">
                                     <label for="nama" class="form-label">Nama Produk</label>
-                                    <input type="text" name="name_product" id="nama" required
-                                        value="{{ $item->name_product }}" class="form-control" autofocus>
+                                    <input type="text" name="name" id="nama" required
+                                        value="{{ $product->name }}" class="form-control" autofocus>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="price" class="form-label">Harga</label>
-                                    <input type="number" name="unit_price" id="price" value="{{ $item->unit_price }}"
+                                    <input type="text" name="unit_price" id="price" value="{{ $product->price }}"
                                         class="form-control">
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="stock" class="form-label">Stok</label>
-                                    <input type="number" class="form-control" value="{{ $item->stock }}" name="stock"
+                                    <input type="number" class="form-control" value="{{ $product->stock }}" name="stock"
                                         id="stock">
                                 </div>
                                 <div class="mb-3">
                                     <label for="unit" class="form-label">Satuan</label>
                                     <select name="unit" id="unit" class="form-control" required>
-                                        <option value="{{ $item->unit }}" selected>{{ $item->short }}
-                                        </option>
+
                                         <option disabled>== Pilih ==</option>
                                         @foreach ($units as $item)
-                                            <option value="{{ $item->slug }}">{{ $item->short }}</option>
+                                            <option value="{{ $item->slug }}" {{ $product->unit == $item->slug ? 'selected' : '' }} > {{ $item->short }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -73,11 +72,11 @@
                                         </option> --}}
                                         <option disabled>== Pilih ==</option>
                                         @foreach ($categories as $item)
-                                            <option value="{{ $item->slug }}">{{ $item->name }}</option>
+                                            <option value="{{ $item->id }}" {{ $product->category_id == $item->id ? 'selected' : '' }} >{{ $item->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                        @endforeach
+
                         <button type="submit" class="btn btn-primary">Simpan</button>
                         </form>
                     </div>
@@ -85,4 +84,14 @@
             </section>
         </div>
     </div>
+    @section('script')
+     <script src="{{ asset('js/jquery.number.min.js') }}"></script>
+
+        <script>
+
+            $('input#price').number(true,0)
+
+        </script>
+    @endsection
 @endsection
+

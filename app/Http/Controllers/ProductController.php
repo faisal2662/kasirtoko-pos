@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use DataTables;
 use App\Models\Unit;
+
 use App\Models\Product;
 use App\Models\category;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -18,9 +21,27 @@ class ProductController extends Controller
     public function index()
     {
         //
-        $products = Product::join('categories', 'categories.slug', '=', 'products.category_id')->join('units', 'units.slug' , '=', 'products.unit')->get(['products.*', 'units.short']);
-        // dd($products);
-        return view('/dashboard/product/index', ['products' => $products]);
+
+        return view('/dashboard/product/index');
+    }
+
+
+    public function datatables()
+    {
+        $products = Product::join('categories', 'categories.id', '=', 'products.category_id')->join('units', 'units.slug', '=', 'products.unit')
+            ->select('products.*', 'categories.name as categories_name', 'units.short')
+            ->get();
+        $no = 1;
+        $update = '';
+        $delete = '';
+        $show = '';
+        foreach ($products as $product) {
+            # code...
+            $product->no = $no++;
+            $update = '<a href="' . route('product.edit', $product->id) . '" class="badge bg-warning"> <i class="bx bx-edit"></i></a>';
+            $product->action = $show .  ' | ' . $update . ' | ' . $delete;
+        }
+        return DataTables::of($products)->escapecolumns([])->make();
     }
 
     /**
@@ -34,7 +55,7 @@ class ProductController extends Controller
         //
         $category = category::all();
         $units = Unit::all();
-        return view('dashboard.product.create' , ['category' => $category, 'units' => $units]);
+        return view('dashboard.product.create', ['category' => $category, 'units' => $units]);
     }
 
     /**
@@ -48,10 +69,13 @@ class ProductController extends Controller
         //
         // dd($request);
         $request->validate([
-            'name_product' => 'required|unique:products',
+            'name' => 'required|unique:products',
             'category_id' => 'required',
             'unit' => 'required'
         ]);
+        $request['price']  = str_replace(',', '', $request->price);
+        dd($request->all());
+
         Product::create($request->all());
         return redirect('/dashboard/product-add')->with('success', 'Simpan Berhasil');
     }
@@ -65,7 +89,7 @@ class ProductController extends Controller
     public function show($id)
     {
         //
-       
+
     }
 
     /**
@@ -81,9 +105,11 @@ class ProductController extends Controller
         $units = Unit::get();
         $categories = Category::get();
         // $products = Product::where('slug', $id)->get();
-        $products = Product::where('products.slug', $id)->join('categories', 'categories.slug', '=', 'products.category_id')->join('units', 'units.slug', '=', 'products.unit')->get(['products.*', 'units.short']);
+        $products = Product::where('products.id', $id)->join('categories', 'categories.id', '=', 'products.category_id')->join('units', 'units.slug', '=', 'products.unit')
+        ->select('products.*', 'units.short')
+        ->first();
         // dd($products);
-        return view('/dashboard/product/edit', ['products' => $products , 'categories' => $categories, 'units' => $units]);
+        return view('/dashboard/product/edit', ['product' => $products, 'categories' => $categories, 'units' => $units]);
     }
 
     /**
@@ -97,14 +123,20 @@ class ProductController extends Controller
     {
         //
         // dd($request);
-     
+
         $validate = $request->validate([
-            'name_product' => 'required',
-            
+            'name' => 'required',
+
         ]);
 
-        $product = product::where('slug', $id)->first();
-        $product->slug = null;
+        $product = product::where('id', $id)->first();
+        // $product->slug =null;
+        $product->name = $request->name;
+        $product->price =  str_replace(',', '', $request->unit_price);
+        $product->stock = $request->stock;
+        $product->unit  = $request->unit;
+        $product->category_id = $request->category_id;
+
         // $product->update([
         //     'name_product' => $request['name_product'],
         //     'category_id' => $request['category_id'],
@@ -112,9 +144,9 @@ class ProductController extends Controller
         //     'stock' => $request['stock'],
         //     'unit' => $request['unit']
         // ]);
-        $product->update($request->all());
-        return redirect('/dashboard/product')->with('success', 'Ubah Berhasil');
-
+        $product->updated_by = Auth::user()->id;
+        $product->update();
+        return back()->with('success', 'Ubah Berhasil');
     }
 
     /**

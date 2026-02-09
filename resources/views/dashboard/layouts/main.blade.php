@@ -30,6 +30,7 @@
 
     <!-- Template Main CSS File -->
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+    <link href="{{ asset('datatables/datatables.min.css') }}" rel="stylesheet">
 
     <!-- =======================================================
   * Template Name: NiceAdmin
@@ -66,7 +67,10 @@
 
     <!-- Template Main JS File -->
     <script src="{{ asset('js/main.js') }}"></script>
-
+    {{-- <script src="{{ asset('js/jquery-4.0.0.min.js') }}"></script> --}}
+    <script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ asset('datatables/datatables.min.js') }}"></script>
+    @yield('script')
 </body>
 
 </html>

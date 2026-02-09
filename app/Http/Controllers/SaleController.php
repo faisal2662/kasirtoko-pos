@@ -50,7 +50,7 @@ class SaleController extends Controller
           if($request['cetak']){
             dd('berhasil');
         }
-        // dd('seu');   
+        // dd('seu');
         $date = Carbon::today();
         $code = "TRX-";
         $codeEnd = Str::random(3);
@@ -83,7 +83,7 @@ class SaleController extends Controller
             ]);
 
         }
-    
+
             ProductOut::create([
                 'code_product_out' => 'TRXO-' . $codeEnd,
                 'sale_id' => $code ,
@@ -144,7 +144,7 @@ class SaleController extends Controller
             $search = $request->get('search');
             if($search != '')
             {
-                $data = DB::table('products')->where('name_product','like','%' .$search. '%')->get();
+                $data = Product::where('name','like','%' .$search. '%')->get();
             }
             // else
             // if you want to show all the data

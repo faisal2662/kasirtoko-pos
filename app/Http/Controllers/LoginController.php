@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class LoginController extends Controller
@@ -18,14 +19,16 @@ class LoginController extends Controller
     {
         //
 
-        $user = User::find(1)->role()->first();
+        // $user = User::find(1)->role()->first();
         // dd($user);
-        return view('login',['user' => $user]);
-        
+        // return view('login',['user' => $user]);
+        // return(Hash::make('123'));
+        return view('login');
+
     }
 
     public function authenticate(Request $request){
-       
+
         $credentials = $request->validate([
             'username' => 'required',
             'password' => 'required'
@@ -33,20 +36,20 @@ class LoginController extends Controller
 
         if(Auth::attempt($credentials)){
             $request->session()->regenerate();
-            return redirect()->intended('/dashboard');
+            return redirect()->intended('/');
         }
          Alert::toast('Username / Password Salah', 'error');
         return back();
-    
+
     }
 
     public function logout(Request $request){
         Auth::logout();
- 
+
     $request->session()->invalidate();
- 
+
     $request->session()->regenerateToken();
- 
+
     return redirect('/login');
     }
 

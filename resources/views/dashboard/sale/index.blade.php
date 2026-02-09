@@ -137,6 +137,10 @@
             </div>
         </div>
     </div>
+@section('script')
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script>
         const se = document.getElementById('nambar');
         const harsat = document.getElementById('harsat');
@@ -162,7 +166,7 @@
             const jumlahTotal = document.getElementById('jumlahTotal')
             //Search Value
             //Search Url
-            const url = "/search" + "?search=" + val;
+            const url = "{{ route('search.product') }}?search=" + val;
 
             console.log(url);
             fetch(url)
@@ -437,6 +441,5 @@
             });
         })
     </script> --}}
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+@endsection
 @endsection
