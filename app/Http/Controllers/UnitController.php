@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Unit;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class UnitController extends Controller
 {
@@ -39,12 +40,16 @@ class UnitController extends Controller
     {
         //
         $validated = $request->validate([
-            'name' => 'required|unique:units',
+            'name' => ['required',
+               Rule::unique('units')->where(function ($query)  {
+                    return $query->where('is_deleted', 'N');
+                })
+            ],
             'short' => 'required|unique:units'
         ]);
 
         Unit::create($request->all());
-        return redirect('dashboard/unit')->with('success', 'Simpan Berhasil');
+        return redirect()->route('unit')->with('success', 'Simpan Berhasil');
     }
 
     /**

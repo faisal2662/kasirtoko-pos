@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
 use App\Models\Product;
 use App\Models\ProductIn;
-use Illuminate\Support\Str;
+use App\Models\Supplier;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ProductInController extends Controller
 {
@@ -17,9 +20,23 @@ class ProductInController extends Controller
      */
     public function index()
     {
-        $products = Product::join('categories', 'categories.slug', '=', 'products.category_id')->join('units', 'units.slug', '=', 'products.unit')->get(['products.*', 'units.short']);
+        $products = Product::where('is_deleted', 'N')->orderBy('id', 'desc')->get();
+        $suppliers = Supplier::where('is_deleted', 'N')->get();
         // dd($products);
-        return view('/dashboard/product-in/index', ['products' => $products]);
+        return view('/dashboard/product-in/index', ['suppliers' => $suppliers, 'products' => $products]);
+    }
+
+    public function getData(Request $request)
+    {
+        try {
+            $product = Product::where('products.is_deleted', 'N')->where('products.id', $request->id_barang)->join('units', 'units.id', 'products.unit_id')
+                ->select('products.*', 'units.name as unit_name', 'units.short')
+                ->first();
+            return response()->json(['status' => 'success', 'data' => $product], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json(['status' => 'failed', 'desc' => 'Gagal pada saat mengambil data', $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -41,26 +58,41 @@ class ProductInController extends Controller
     public function store(Request $request)
     {
         //
-        $date = Carbon::today();
 
-        $unit = $request['unit'];
-        $slug = $request['slug'];
-        $stock = Product::where('slug', $slug)->first();
-        $stock = $request['unit'] += $stock['stock'];
-        Product::where('slug', $slug)->first()->update(['stock' => $stock]);
-    $code = Str::random(3); 
-        $code = $slug. '-'. $code;
-        
-        ProductIn::create([
-            'code_product_in' => $code,
-            'product_id'  => $slug,
-            'date_in' => $date,
-            'unit' => $unit,
+        try {
+            DB::beginTransaction();
+            //code...
+            $product = Product::where('id', $request->barang)->first();
+            $qty = $request->unit;
+            $unit_selected = $request->unit_selected;
+            $totalUnit = 0;
 
-        ]);
-        // dd($code);
+            $totalUnit = $qty * $product->content_per_unit;
 
-        return redirect('/dashboard/productIn')->with('success', 'Tambah Berhasil');
+            $supplier_id = null;
+            if ($request->supplier) {
+                $supplier_id = $request->supplier;
+            }
+
+            ProductIn::create([
+                'product_id'  => $request->barang,
+                'supplier_id' => $supplier_id,
+                'date_in' => Carbon::now(),
+                'unit' => $qty,
+                'created_by' => Auth::user()->id,
+
+            ]);
+
+            $product->increment('stock', $totalUnit);
+
+            DB::commit();
+            return response()->json(['status' => 'success', 'desc' => 'Simpan Berhasil'], 200);
+            // dd($code);
+        } catch (\Throwable $th) {
+            //throw $th;
+            DB::rollback();
+            return response()->json(['status' => 'failed', 'message' => 'Terjadi Kesalahan Dalam Menyimpan', $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -73,8 +105,8 @@ class ProductInController extends Controller
     {
         //
         $histories = ProductIn::join('products', 'products.slug', '=', 'product_ins.product_id')->where('product_ins.product_id', $id)->get(['products.name_product', 'product_ins.*']);
-        
-        return view('/dashboard/product-in/show', ['histories' => $histories , 'id' => $id]);
+
+        return view('/dashboard/product-in/show', ['histories' => $histories, 'id' => $id]);
     }
 
     /**
@@ -113,8 +145,6 @@ class ProductInController extends Controller
         $akhir = Carbon::now()->endOfMonth()->toDateString();
 
         $d = ProductIn::where('product_id', $id)->whereBetween('created_at', [$awal, $akhir])->delete();
-        return redirect('dashboard/productIn')->with('success','Hapus Riwayat Berhasil');
-
-
+        return redirect('dashboard/productIn')->with('success', 'Hapus Riwayat Berhasil');
     }
 }

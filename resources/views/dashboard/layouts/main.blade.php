@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    <title>Dashboard - NiceAdmin Bootstrap Template</title>
+    <title> @yield('title') </title>
     <meta content="" name="description">
     <meta content="" name="keywords">
 
@@ -22,7 +22,9 @@
     <!-- Vendor CSS Files -->
     <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
-    <link href="{{ asset('vendor/boxicons/css/boxicons.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('vendor/boxicons/fonts/basic/boxicons.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('vendor/boxicons/fonts/animations.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('vendor/boxicons/fonts/transformations.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/quill/quill.snow.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/quill/quill.bubble.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/remixicon/remixicon.css') }}" rel="stylesheet">
@@ -31,6 +33,7 @@
     <!-- Template Main CSS File -->
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
     <link href="{{ asset('datatables/datatables.min.css') }}" rel="stylesheet">
+    @yield('head')
 
     <!-- =======================================================
   * Template Name: NiceAdmin
@@ -70,6 +73,89 @@
     {{-- <script src="{{ asset('js/jquery-4.0.0.min.js') }}"></script> --}}
     <script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ asset('datatables/datatables.min.js') }}"></script>
+    <script src="{{ asset('vendor/sweetalert/sweetalert.all.js') }}"></script>
+        {{-- <script src="{{ asset('assets/notiflix/src/notiflix.js') }}"></script>
+        <script>
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            Notiflix.Confirm.init({
+                width: '350px',
+                titleColor: '#3656dc',
+                okButtonBackground: '#3656dc',
+            });
+            Notiflix.Loading.init({
+                backgroundColor: '#4b49a14d',
+                svgColor: '#0f12b6',
+            })
+            Notiflix.Notify.init({
+                width: '280px',
+                position: 'right-top',
+                distance: '10px',
+                opacity: 1,
+                borderRadius: '5px',
+                rtl: false,
+                timeout: 3000,
+                messageMaxLength: 110,
+                backOverlay: false,
+                backOverlayColor: 'rgba(0,0,0,0.5)',
+                plainText: true,
+                showOnlyTheLastOne: false,
+                clickToClose: false,
+                pauseOnHover: true,
+                ID: 'NotiflixNotify',
+                className: 'notiflix-notify',
+                zindex: 4001,
+                fontFamily: 'Quicksand',
+                fontSize: '13px',
+                cssAnimation: true,
+                cssAnimationDuration: 400,
+                cssAnimationStyle: 'fade',
+                closeButton: false,
+                useIcon: true,
+                useFontAwesome: false,
+                fontAwesomeIconStyle: 'basic',
+                fontAwesomeIconSize: '34px',
+                success: {
+                    background: '#32c682',
+                    textColor: '#fff',
+                    childClassName: 'notiflix-notify-success',
+                    notiflixIconColor: 'rgba(0,0,0,0.2)',
+                    fontAwesomeClassName: 'fas fa-check-circle',
+                    fontAwesomeIconColor: 'rgba(0,0,0,0.2)',
+                    backOverlayColor: 'rgba(50,198,130,0.2)',
+                },
+                failure: {
+                    background: '#ff5549',
+                    textColor: '#fff',
+                    childClassName: 'notiflix-notify-failure',
+                    notiflixIconColor: 'rgba(0,0,0,0.2)',
+                    fontAwesomeClassName: 'fas fa-times-circle',
+                    fontAwesomeIconColor: 'rgba(0,0,0,0.2)',
+                    backOverlayColor: 'rgba(255,85,73,0.2)',
+                },
+                warning: {
+                    background: '#eebf31',
+                    textColor: '#fff',
+                    childClassName: 'notiflix-notify-warning',
+                    notiflixIconColor: 'rgba(0,0,0,0.2)',
+                    fontAwesomeClassName: 'fas fa-exclamation-circle',
+                    fontAwesomeIconColor: 'rgba(0,0,0,0.2)',
+                    backOverlayColor: 'rgba(238,191,49,0.2)',
+                },
+                info: {
+                    background: '#26c0d3',
+                    textColor: '#fff',
+                    childClassName: 'notiflix-notify-info',
+                    notiflixIconColor: 'rgba(0,0,0,0.2)',
+                    fontAwesomeClassName: 'fas fa-info-circle',
+                    fontAwesomeIconColor: 'rgba(0,0,0,0.2)',
+                    backOverlayColor: 'rgba(38,192,211,0.2)',
+                },
+            });
+        </script> --}}
     @yield('script')
 </body>
 

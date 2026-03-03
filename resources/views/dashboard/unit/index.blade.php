@@ -77,7 +77,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="/dashboard/unit-add" method="post">
+                    <form action="{{ route('unit.add') }}" method="post">
                         @csrf
                         <div class="mb-3">
                             <label for="name" class="form-label">Nama Unit</label>
@@ -110,7 +110,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form action="/dashboard/unit-edit/{{ $item->slug }}" method="post">
+                        <form action="{{ route('unit.edit', $item->slug) }}}}" method="post">
                             @csrf
                             @method('put')
                             <div class="mb-3">
@@ -138,7 +138,7 @@
 
     {{-- modal delete --}}
     @foreach ($units as $item)
-        <div class="modal" id="deleteUnit{{ $item->slug }}" tabindex="-1">
+        <div class="modal" id="{{ route('unit.delete', $item->slug) }}}}" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
