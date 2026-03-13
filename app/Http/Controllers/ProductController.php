@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use DataTables;
-use Carbon\Carbon;
-
-use App\Models\Unit;
-use App\Models\Product;
 use App\Models\category;
-use Illuminate\Support\Str;
+use App\Models\Product;
+use App\Models\Unit;
+use Carbon\Carbon;
+use DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -87,26 +87,55 @@ class ProductController extends Controller
             'is_pajak' => 'required'
         ]);
 
-        try {
 
+        try {
+            DB::beginTransaction();
+
+            $lastProduct = Product::where('is_deleted', 'N')
+                ->orderBy('id', 'desc')
+                ->first();
+
+
+            $nextNumber = 1;
+
+            if ($lastProduct) {
+                if ($lastProduct->code_product == null) {
+
+                    $lastNumber = 0;
+                } else {
+
+                    $lastNumber = (int) substr($lastProduct->code_product, -3);
+                }
+                $nextNumber = $lastNumber + 1;
+            }
+
+            // konversi stok ke satuan tercecil
+            $stock = $request->stock * $request->content_per_unit;
+            $min_stock =$request->min_stock * $request->content_per_unit;
+
+            $kode_product = 'BRNG-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
             $product = new Product;
+            $product->code_product = $kode_product;
             $product->category_id = $request->category_id;
             $product->name = $request->name;
             $product->purchase_price = str_replace(',', '', $request->purchase_price);
             $product->selling_price = str_replace(',', '', $request->selling_price);
+            $product->price_grosir = str_replace(',', '', $request->price_grosir);
             $product->content_per_unit = $request->content_per_unit;
-            $product->stock = $request->stock;
+            $product->stock = $stock;
             $product->purchase_unit_id = $request->purchase_unit_id;
-            $product->min_stock = $request->min_stock;
+            $product->min_stock = $min_stock;
             $product->unit_id = $request->unit;
             $product->is_pajak = $request->is_pajak;
             $product->created_by = Auth::user()->id;
             $product->save();
 
+            DB::commit();
             return response()->json(['status' => 'success', 'desc' => 'Simpan Produk Berhasil'], 200);
             return redirect()->route('product.add')->with('success', 'Simpan Berhasil');
         } catch (\Throwable $th) {
-            return response()->json(['status' => 'failed', 'message' => 'Simpan Produk Gagal', $th->getMessage()], 500);
+            DB::rollback();
+            return response()->json(['status' => 'failed', 'message' => 'Simpan Produk Gagal'], 500);
             throw $th;
             return redirect()->route('product.add')->with('success', 'Simpan Berhasil');
         }
@@ -164,8 +193,8 @@ class ProductController extends Controller
         //
         // dd($request);
 
-              $request->validate([
-            'name' => 'required|unique:products',
+        $request->validate([
+            'name' => 'required|exists:products',
             'category_id' => 'required',
             'unit' => 'required',
             'content_per_unit' => 'required',
@@ -177,24 +206,31 @@ class ProductController extends Controller
         ]);
 
         try {
+            DB::beginTransaction();
+
+            // $konversi stock
+            $stock  = $request->stock * $request->content_per_unit;
+
 
             $product =  Product::where('id', $id)->first();
             $product->category_id = $request->category_id;
             $product->name = $request->name;
             $product->purchase_price = str_replace(',', '', $request->purchase_price);
             $product->selling_price = str_replace(',', '', $request->selling_price);
+            $product->price_grosir = str_replace(',', '', $request->price_grosir);
             $product->content_per_unit = $request->content_per_unit;
-            $product->stock = $request->stock;
+            $product->stock = $stock;
             $product->purchase_unit_id = $request->purchase_unit_id;
             $product->min_stock = $request->min_stock;
             $product->unit_id = $request->unit;
             $product->is_pajak = $request->is_pajak;
             $product->updated_by = Auth::user()->id;
             $product->update();
-
+            DB::commit();
             return response()->json(['status' => 'success', 'desc' => 'Update Produk Berhasil'], 200);
             return redirect()->route('product.add')->with('success', 'Simpan Berhasil');
         } catch (\Throwable $th) {
+            DB::rollBack();
             return response()->json(['status' => 'failed', 'message' => 'Update Produk Gagal', $th->getMessage()], 500);
             throw $th;
             return redirect()->route('product.add')->with('success', 'Simpan Berhasil');
@@ -220,6 +256,20 @@ class ProductController extends Controller
         } catch (\Throwable $th) {
             //throw $th;
             return response()->json(['status' => 'failed', 'desc' => 'Delete Gagal'], 500);
+        }
+    }
+
+
+    public function adjustStock(Request $request)
+    {
+        try {
+            $product = Product::where('id', $request->product_id)->first();
+            $product->stock = $request->stock;
+            $product->update();
+            return response()->json(['status' => 'success', 'desc' => 'Penyesuaian stock Berhasil'], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json(['status' => 'failed', 'message' => 'Penyesuaian stock Gagal', $th->getMessage()], 500);
         }
     }
 }

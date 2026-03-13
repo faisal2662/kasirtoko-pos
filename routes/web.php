@@ -1,22 +1,24 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SaleController;
-use App\Http\Controllers\UnitController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\GeneralController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductInController;
 use App\Http\Controllers\ProductOutController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportUnitController;
 use App\Http\Controllers\RoleCustomerController;
+use App\Http\Controllers\SaleController;
+use App\Http\Controllers\StoreSettingController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,18 +48,22 @@ Route::middleware('auth')->group(function () {
     Route::post('/dashboard/users-profile/newPass', [ProfileController::class, 'newPass']);
     Route::post('/dashboard/users-profile/update/{id}', [ProfileController::class, 'update']);
 
+
     //  sale
-    Route::get('/dashboard/sale', [SaleController::class, 'index']);
+    Route::get('/dashboard/sale', [SaleController::class, 'index'])->name('sale');
     Route::get('/search', [SaleController::class, 'search'])->name('search.product');
     Route::get('/result', [SaleController::class, 'result']);
-    Route::post('/dashboard/sale', [SaleController::class, 'store']);
+    Route::post('/dashboard/sale', [SaleController::class, 'store'])->name('sale.store');
     Route::post('/dashboard/sale/print', [SaleController::class, 'print']);
+    Route::get("/get-data-populer", [SaleController::class,'getDataPopuler'])->name('sale.getPopuler');
+
 
     Route::prefix('customer')->group(function () {
 
         // customer pages
         Route::get('/dashboard/customer', [CustomerController::class, 'index'])->name('customer.index');
         Route::get('/dashboard/customer-add', [CustomerController::class, 'create']);
+        Route::get('/get-customer',[CustomerController::class,'getData'])->name('customer.getData');
         Route::get('/customer-datatable', [CustomerController::class, 'datatable'])->name('customer.datatable');
         Route::post('/dashboard/customer-add', [CustomerController::class, 'store'])->name('customer.store');
         Route::get('/dashboard/customer/edit/{code_customer}', [CustomerController::class, 'edit'])->name('customer.edit');
@@ -84,6 +90,8 @@ Route::middleware('auth')->group(function () {
         Route::get('product-edit/{slug}', [ProductController::class, 'edit'])->name('product.edit');
         Route::put('product-edit/{slug}', [ProductController::class, 'update'])->name('product.update');
         Route::get('product-delete/{slug}', [ProductController::class, 'destroy'])->name('product.destroy');
+
+        Route::post('product-adjust-stock', [ProductController::class, 'adjustStock'])->name('product.adjust_stock');
     });
 
     Route::prefix('supplier')->group(function () {
@@ -145,7 +153,21 @@ Route::middleware('auth')->group(function () {
             Route::put('/update/{id}', [RoleCustomerController::class, 'update'])->name('role_customer.update');
             Route::get('/destroy/{id}', [RoleCustomerController::class, 'destroy'])->name('role_customer.destroy');
         });
+
+        Route::prefix('store-setting')->group(function(){
+            Route::get('/', [StoreSettingController::class,'index'])->name('store_setting');
+            Route::post('/store', [StoreSettingController::class, 'store'])->name('store_setting.store');
+
+        });
     });
+
+    Route::prefix('invoice')->group(function(){
+        Route::get('/', [InvoiceController::class, 'index'])->name('invoice.index');
+        Route::get('/datatable', [InvoiceController::class,'datatable'])->name('invoice.datatable');
+        Route::get('/show/{id}', [InvoiceController::class,'show'])->name('invoice.show');
+        Route::post('/print-ulang', [InvoiceController::class,'prePrint'])->name('invoice.prePrint');
+        });
+
 
     // laporan keuangan
     Route::get('/dashboard/report', [ReportController::class, 'index']);
@@ -157,9 +179,9 @@ Route::middleware('auth')->group(function () {
 
 
     // user
-    Route::get('/dashboard/user', [UserController::class, 'index']);
-    Route::post('/dashboard/user-add', [UserController::class, 'store']);
-    Route::put('/dashboard/user-edit/{id}', [UserController::class, 'update']);
-    Route::delete('/dashboard/user-delete/{id}', [UserController::class, 'destroy']);
-    Route::put('/dashboard/user-pass/{id}', [UserController::class, 'passUpdate']);
+    Route::get('/dashboard/user', [UserController::class, 'index'])->name('user.index');
+    Route::post('/dashboard/user-add', [UserController::class, 'store'])->name('user.store');
+    Route::put('/dashboard/user-edit/{id}', [UserController::class, 'update'])->name('user.update');
+    Route::delete('/dashboard/user-delete/{id}', [UserController::class, 'destroy'])->name('user.destroy');
+    Route::put('/dashboard/user-pass/{id}', [UserController::class, 'passUpdate'])->name('user.pass.update');
 });

@@ -90,6 +90,11 @@
                         <i class="bi bi-list-ul"></i><span>Role Customer</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('store_setting') }}" @if (Request::is('master-data/store_setting/*') ) class="active" @endif>
+                        <i class="bi bi-list-ul"></i><span>Setup Print</span>
+                    </a>
+                </li>
 
             </ul>
         </li>
@@ -101,6 +106,13 @@
                 href="{{ route('product.in') }}">
                <i class="bi bi-box-arrow-in-down"></i>
                 <span>Barang Masuk</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ Request::is('invoice/') ? '' : 'collapsed' }} "
+                href="{{ route('invoice.index') }}">
+               <i class="bi bi-box-arrow-in-down"></i>
+                <span>Invoice</span>
             </a>
         </li>
         <li class="nav-item">

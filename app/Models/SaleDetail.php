@@ -6,6 +6,7 @@ use App\Models\Sale;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SaleDetail extends Model
 {
@@ -20,6 +21,12 @@ class SaleDetail extends Model
      */
     public function sale(): HasOne
     {
-        return $this->hasOne(Sale::class, 'code_sale', 'sale_id');
+        return $this->hasOne(Sale::class, 'id', 'sale_id');
+    }
+
+
+    public function product() :HasOne
+    {
+        return $this->hasOne(Product::class,'id', 'product_id');
     }
 }

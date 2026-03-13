@@ -200,4 +200,15 @@ class CustomerController extends Controller
             return response()->json(['status' => 'failed', 'message' => 'Terjadi Kesalahan', $th->getMessage()], 500);
         }
     }
+
+
+    public function getData(){
+        try {
+            $customer = Customer::where('is_deleted', 'N')->get();
+            return response()->json(['status' => 'success','data' => $customer],200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json(['status' => 'failed' , 'message' => 'Terjadi Kesalahan saat mengambil data customer'],500);
+        }
+    }
 }

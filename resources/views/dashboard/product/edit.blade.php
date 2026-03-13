@@ -19,7 +19,7 @@
                     <div class="card-body">
                         <a href="{{ route('product') }}" class="btn btn-secondary"
                             style="float: right; margin-top:30px;">Kembali</a>
-                        <div class="card-title">Data Barang</div>
+                        <div class="card-title">Data Ubah Barang</div>
                         @if (session()->has('success'))
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 {{ session('success') }}
@@ -56,10 +56,10 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="unit" class="form-label">Satuan Pembelian <span class="text-danger">*</span>
+                                <label for="unit" class="form-label">Satuan Dasar <span class="text-danger">*</span>
                                 </label>
                                 <select name="unit" id="unit" class="form-control" required>
-                                    <option selected disabled>-- Pilih Pembelian --</option>
+                                    <option selected disabled>-- Pilih Dasar --</option>
                                     @foreach ($units as $item)
                                         <option value="{{ $item->id }}" {{ $product->unit_id == $item->id ? 'selected' : '' }} >{{ $item->short }} - {{ $item->name }}
                                         </option>
@@ -67,10 +67,10 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="" class="form-label">Satuan Penjualan <span
+                                <label for="" class="form-label">Satuan Pembelian <span
                                         class="text-danger">*</span></label>
                                 <select name="purchase_unit_id" id="purchase_unit_id" class="form-control" required>
-                                    <option  disabled>-- Pilih Penjualan --</option>
+                                    <option  disabled>-- Pilih Pembelian --</option>
                                     @foreach ($units as $item)
                                         <option value="{{ $item->id }}" {{ $product->purchase_unit_id == $item->id ? 'selected' : '' }} >{{ $item->short }} - {{ $item->name }}
                                         </option>
@@ -78,7 +78,7 @@
                                 </select>
                             </div>
                                 <div class="mb-3">
-                                <label for="" class="form-label">Isi Per Satuan <span class="text-danger">*</span>
+                                <label for="" class="form-label">Isi Per Satuan dus/karton <span class="text-danger">*</span>
                                 </label>
                                 <input type="number" class="form-control" value="{{ $product->content_per_unit }}" required name="content_per_unit">
                             </div>
@@ -95,13 +95,19 @@
                                 <input type="text" name="selling_price" inputMode="numeric" id="selling_price" required
                                     class="form-control rupiah" value="{{ $product->selling_price }}" >
                             </div>
+                             <div class="mb-3">
+                                <label for="price" class="form-label">Harga Jual Per Dus/Karton<span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="price_grosir" value="{{ $product->price_grosir }}" inputMode="numeric" id="price_grosir" required
+                                    class="form-control rupiah">
+                            </div>
                             <div class="mb-3">
                                 <label for="stock" class="form-label">Stok <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" required name="stock" value="{{ $product->stock }}" id="stock">
+                                <input type="number" class="form-control" readonly required name="stock" value="{{ $product->stock }}" id="stock">
                             </div>
                             <div class="mb-3">
                                 <label for="stock" class="form-label">Min Stok <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" required name="min_stock" id="stock" value="{{ $product->min_stock }}" >
+                                <input type="number" class="form-control"  required name="min_stock" id="stock" value="{{ $product->min_stock }}" >
                             </div>
                             <label for="" class="form-label">Masuk Pajak?</label>
                             <div class="mb-3">
@@ -158,7 +164,7 @@
                         text: res.desc,
                         timer: 2000 // Otomatis tutup dalam 2 detik
                     });
-                    $('input.form-control').val('')
+
                     setTimeout(() => {
 
                         Swal.close();

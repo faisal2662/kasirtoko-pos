@@ -49,17 +49,28 @@
                             <div class="mb-3">
                                 <label for="category" class="form-label">Kategori <span class="text-danger">*</span></label>
                                 <select name="category_id" id="category" class="form-control" required>
-                                    <option selected disabled>-- Pilih Kategori -- </option>
-                                    @foreach ($categor as $item)
+                                    <option selected  disabled>-- Pilih Kategori -- </option>
+                                    @foreach ($category as $item)
                                         <option value="{{ $item->id }}">{{ $item->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <div class="mb-3">
-                                <label for="unit" class="form-label">Satuan Pembelian <span class="text-danger">*</span>
+                                <label for="unit" class="form-label">Satuan Dasar <span class="text-danger">*</span>
                                 </label>
                                 <select name="unit" id="unit" class="form-control" required>
+                                    <option selected disabled>-- Pilih Dasar --</option>
+                                    @foreach ($units as $item)
+                                        <option value="{{ $item->id }}">{{ $item->short }} - {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="" class="form-label">Satuan Pembelian <span
+                                        class="text-danger">*</span></label>
+                                <select name="purchase_unit_id" id="purchase_unit_id" class="form-control" required>
                                     <option selected disabled>-- Pilih Pembelian --</option>
                                     @foreach ($units as $item)
                                         <option value="{{ $item->id }}">{{ $item->short }} - {{ $item->name }}
@@ -68,18 +79,7 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="" class="form-label">Satuan Penjualan <span
-                                        class="text-danger">*</span></label>
-                                <select name="purchase_unit_id" id="purchase_unit_id" class="form-control" required>
-                                    <option selected disabled>-- Pilih Penjualan --</option>
-                                    @foreach ($units as $item)
-                                        <option value="{{ $item->id }}">{{ $item->short }} - {{ $item->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="" class="form-label">Isi Per Satuan <span class="text-danger">*</span>
+                                <label for="" class="form-label">Isi Per Dus / Karton <span class="text-danger">*</span>
                                 </label>
                                 <input type="number" class="form-control" required name="content_per_unit">
                             </div>
@@ -94,6 +94,12 @@
                                 <label for="price" class="form-label">Harga Jual <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" name="selling_price" inputMode="numeric" id="selling_price" required
+                                    class="form-control rupiah">
+                            </div>
+                            <div class="mb-3">
+                                <label for="price" class="form-label">Harga Jual Per Dus/Karton<span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="price_grosir" inputMode="numeric" id="price_grosir" required
                                     class="form-control rupiah">
                             </div>
                             <div class="mb-3">
@@ -161,6 +167,7 @@
                         timer: 2000 // Otomatis tutup dalam 2 detik
                     });
                     $('input.form-control').val('')
+                    $('select.form-control').val('')
                     setTimeout(() => {
 
                         Swal.close();

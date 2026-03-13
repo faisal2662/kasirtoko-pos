@@ -61,7 +61,7 @@
 
     {{-- modal --}}
     <div class="modal fade" id="modalCustomer" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title"><span id="title-customer"></span>
@@ -70,8 +70,8 @@
                             class="bx bx-refresh-cw-alt bx-spin"></i></span>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="formCustomer" method="post">
-                    <div class="modal-body">
+                <div class="modal-body">
+                        <form id="formCustomer" method="post" >
                         @csrf
                         <input type="hidden" name="id_customer" id="id_customer">
                         <div class="mb-3">
@@ -115,11 +115,11 @@
                         </div>
 
                     </div>
+                </form>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                        <button type="submit" class="btn btn-primary">Simpan </button>
+                        <button type="submit" class="btn btn-primary btn-save-customer">Simpan </button>
                     </div>
-                </form>
             </div>
         </div>
     </div>
@@ -163,9 +163,12 @@
         });
 
         let form = null;
+
         function addCustomer() {
             $('#modalCustomer').modal('show');
-            $('#title-customer').text('Tambah Customer')
+            $('#title-customer').text('Tambah Customer');
+            $('input.form-control').val('')
+            $('textarea.form-control').val('')
             form = 'add';
         }
 
@@ -208,10 +211,10 @@
             })
         }
 
-        $('#formCustomer').on('submit', function(e) {
+        $('.btn-save-customer').on('click', function(e) {
             e.preventDefault();
 
-            let formData = $(this).serialize();
+            let formData = $('#formCustomer').serialize();
             if (form == 'add') {
                 $.ajax({
                     url: "{{ route('customer.store') }}",

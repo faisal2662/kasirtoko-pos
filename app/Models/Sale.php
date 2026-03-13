@@ -22,7 +22,7 @@ class Sale extends Model
     public function customer(): HasOne
     {
         return $this->hasOne(Customer::class, 'id', 'customer_id');
-    
+
     }
     /**
      * Get all of the saleDetail for the Sale
@@ -31,8 +31,15 @@ class Sale extends Model
      */
     public function saleDetail(): HasMany
     {
-        return $this->hasMany(SaleDetail::class, 'sale_id', 'code_sale');
+        return $this->hasMany(SaleDetail::class, 'sale_id', 'id');
     }
+
+
+    public function payment(): HasOne
+    {
+        return $this->hasOne(Payment::class,'sale_id', 'id');
+    }
+
 
     /**
      * Get all of the productOut for the Sale
@@ -41,7 +48,7 @@ class Sale extends Model
      */
     public function productOut(): HasMany
     {
-        return $this->hasMany(ProductOut::class, 'product_id', 'code_product');
+        return $this->hasMany(ProductOut::class, 'product_id', 'id');
     }
 
     // hasM

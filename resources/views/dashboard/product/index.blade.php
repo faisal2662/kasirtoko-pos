@@ -82,13 +82,13 @@
                         <div class="col-8"><span id="category"></span></div>
                     </div>
                     <div class="row  mb-2">
-                        <div class="col-4 fw-bold">Satuan Pembelian</div>
+                        <div class="col-4 fw-bold">Satuan Dasar</div>
                         <div class="col-8"><span id="satuan_dasar"></span></div>
                     </div>
-                    {{-- <div class="row  mb-2">
-                        <div class="col-4 fw-bold">Satuan Penjualan</div>
+                    <div class="row  mb-2">
+                        <div class="col-4 fw-bold">Satuan Pembelian</div>
                         <div class="col-8"><span id="purchase_unit_id"></span></div>
-                    </div> --}}
+                    </div>
                     <div class="row  mb-2">
                         <div class="col-4 fw-bold">Isi Per Pembelian</div>
                         <div class="col-8"><span id="content_per_unit"></span></div>
@@ -101,9 +101,15 @@
                         <div class="col-4 fw-bold">Harga Jual</div>
                         <div class="col-8"><span id="selling_price" class="rupiah"></span></div>
                     </div>
+                    <div class="row  mb-2">
+                        <div class="col-4 fw-bold">Harga Jual per dus/karton</div>
+                        <div class="col-8"><span id="price_grosir" class="rupiah"></span></div>
+                    </div>
                     <div class="row mb-2">
                         <div class="col-4 fw-bold">Stok</div>
-                        <div class="col-8"><span id="stock"></span></div>
+                        <div class="col-8"><span id="stock"></span> <span class="float-end"><button id="adjust-stock"
+                                    data-product_id="" onclick="adjustStock(this)" class="btn btn-warning">Sesuaikan
+                                    Stock</button></span></div>
                     </div>
                     <div class="row mb-2">
                         <div class="col-4 fw-bold">Minimal Stock</div>
@@ -113,6 +119,28 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
 
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal" id="modalStockAdjust" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-dark">Sesuaikan Stock <i style="display: none;" id="load"
+                            class="bx bx-refresh-cw-alt bx-spin"></i> </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="product-id-adjust">
+                    <label for="" class="form-label">Stock per pcs</label>
+                    <input type="number" id="input_stock_adjust" class="form-control">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button class="btn btn-warning " id="btn-save-adjust">Perbarui</button>
                 </div>
             </div>
         </div>
@@ -181,12 +209,16 @@
                     $('#name_product').text(res.data.name)
                     $('#category').text(res.data.category_name)
                     $('#satuan_dasar').text(res.data.unit_name)
+                    $('#purchase_unit_id').text(res.data.purchase_unit_name)
                     $('#content_per_unit').text(res.data.content_per_unit + ' / ' + res.data.purchase_unit_name)
                     $('#purchase_price').text(res.data.purchase_price)
                     $('#selling_price').text(res.data.selling_price)
+                    $('#price_grosir').text(res.data.price_grosir)
                     $('#stock').text(res.data.stock)
                     $('#min_stock').text(res.data.min_stock)
                     $('#load').css('display', 'none')
+                    // untuk adjust stock per pcs
+                    $('#adjust-stock').data('product_id', id)
                 },
                 error: function(error) {
                     console.log(error)
@@ -201,11 +233,63 @@
                 complete: function(res) {
                     $('#load').css('display', 'none')
 
-                      $('.rupiah').number(true, 0)
+                    $('.rupiah').number(true, 0)
 
                 }
             })
         }
+
+        function adjustStock(obj) {
+            let product_id = $(obj).data('product_id');
+            $('#product-id-adjust').val(product_id);
+            $('#modalStockAdjust').modal('show');
+            $('#showProduct').modal('hide');
+        }
+
+        $('#btn-save-adjust').on('click', function() {
+            let product_id = $('#product-id-adjust').val();
+            let stock = $('#input_stock_adjust').val();
+
+            $.ajax({
+                url: "{{ route('product.adjust_stock') }}",
+                type: 'post',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    product_id: product_id,
+                    stock: stock
+                },
+                beforesend: function() {
+                    $('#load').show()
+                },
+                success: function(res) {
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "success",
+                        title: res.desc,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    $('#modalStockAdjust').modal('hide');
+                    showData(product_id);
+                    $('#product-id-adjust').val('');
+                    table.ajax.reload()
+
+                },
+                error: function(err) {
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "warning",
+                        title: err.responseJSON.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    })
+                },
+                complete: function() {
+                    $('#load').hide();
+
+                }
+            })
+        })
 
         function deleteData(id) {
             Swal.fire({

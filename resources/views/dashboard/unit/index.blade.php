@@ -1,5 +1,7 @@
 @extends('dashboard.layouts.main')
-
+@section('title')
+    Kasir | Satuan
+@endsection
 @section('container')
     <h3>Unit</h3>
     <nav>
@@ -40,6 +42,7 @@
                                     <th scope="col">No.</th>
                                     <th scope="col">Nama</th>
                                     <th scope="col">Singkat</th>
+                                    <th scope="col">Tipe</th>
                                     <th scope="col">Aksi</th>
                                 </tr>
                             </thead>
@@ -49,6 +52,7 @@
                                         <th scope="row">{{ $loop->iteration }}</th>
                                         <td>{{ $item->name }}</td>
                                         <td>{{ $item->short }}</td>
+                                        <td>{{ $item->type == 'SINGLE' ? 'Tunggal' : 'Banyak' }}</td>
                                         <td><a href="" data-bs-toggle="modal"
                                                 data-bs-target="#editUnit{{ $item->slug }}"
                                                 class="btn btn-warning">Ubah</a>
@@ -76,8 +80,8 @@
                     <h5 class="modal-title">Tambah Unit</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <form action="{{ route('unit.add') }}" method="post">
+                <form action="{{ route('unit.add') }}" method="post">
+                    <div class="modal-body">
                         @csrf
                         <div class="mb-3">
                             <label for="name" class="form-label">Nama Unit</label>
@@ -86,16 +90,23 @@
                         </div>
                         <div class="mb-3">
                             <label for="short" class="form-label">Singkatan</label>
-                            <input type="text" name="short" id="short" class="form-control" autofocus
+                            <input type="text" name="short" id="short" class="form-control"
                                 autocomplete="off">
                         </div>
+                        <div class="mb-3">
+                            <label for="" class="form-label">Tipe</label>
+                            <select name="type" id="" class="form-control">
+                                <option value="SINGLE">Tunggal</option>
+                                <option value="MULTIPLE">Banyak</option>
+                            </select>
+                        </div>
 
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="submit" class="btn btn-primary">Simpan </button>
-                    </form>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-primary">Simpan </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -121,8 +132,15 @@
                             <div class="mb-3">
                                 <label for="short" class="form-label">Singkatan</label>
                                 <input type="text" name="short" id="short" value="{{ $item->short }}"
-                                    class="form-control" autofocus autocomplete="off">
+                                    class="form-control"  autocomplete="off">
                             </div>
+                               <div class="mb-3">
+                            <label for="" class="form-label">Tipe</label>
+                            <select name="type" id="" class="form-control">
+                                <option value="SINGLE" {{ $item->type == 'SINGLE' ? 'selected' : '' }} >Tunggal</option>
+                                <option value="MULTIPLE" {{ $item->type == 'MULTIPLE' ? 'selected' : '' }} >Banyak</option>
+                            </select>
+                        </div>
 
                     </div>
                     <div class="modal-footer">

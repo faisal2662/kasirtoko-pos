@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Validator;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class UserController extends Controller
 {
@@ -19,12 +21,13 @@ class UserController extends Controller
     public function index()
     {
         //
-        $users = User::join('roles', 'roles.id', '=', 'users.role_id')->get();
-
+        $users = User::where('users.is_deleted', 'N')
+        ->get();
+        $roles = Role::where('is_deleted', 'N')->get();
         $title = 'Hapus User Ini';
         $text = "Apakah Kamu Yakin Ingin Hapus ?";
         confirmDelete($title, $text);
-        return view('dashboard.user.index', ['users' => $users]);
+        return view('dashboard.user.index', ['users' => $users, 'roles' => $roles]);
     }
 
     /**
@@ -59,16 +62,17 @@ class UserController extends Controller
             'username' => 'username sudah ada',
             ]
         );
-        
+
         // $validate['status'] = $role;
 
         $request['password'] = Hash::make($request['password']);
         // dd($request);
             // dd($validate);
-            
+
             if ($validate->fails()) {
                 return back()->with('toast_error', $validate->messages()->all()[0])->withInput();
             }
+            $request['created_by']  = Auth::user()->id;
             User::create($request->all());
             return back()->with('toast_success', 'Data Tersimpan');
     }
@@ -92,7 +96,7 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        // 
+        //
         // dd($id);
     }
 
@@ -110,7 +114,8 @@ class UserController extends Controller
         $validate = $request->validate([
             'name' => 'required|max:50',
         ]);
-        User::where('username', $id)->first()->update($request->all());
+        $request['updated_by'] = Auth::user()->id;
+        User::where('id', $id)->first()->update($request->all());
         Alert::toast('Perubahan Berhasil', 'success');
         return back();
     }
@@ -119,6 +124,7 @@ class UserController extends Controller
     {
         // dd($id);
         $request['password']= Hash::make($request['password']);
+
         User::where('username', $id)->first()->update($request->all());
         Alert::toast('Update Password Berhasil', 'success');
         return back();
@@ -134,7 +140,11 @@ class UserController extends Controller
     {
         //
         // dd($id);
-        User::where('username', $id)->first()->delete();
+        $user = User::where('id', $id)->first();
+        $user->deleted_date  = Carbon::now();
+        $user->deleted_by = Auth::user()->id;
+        $user->is_deleted = 'Y';
+        $user->update();
         Alert::toast('Hapus Berhasil','success');
         return back();
     }
