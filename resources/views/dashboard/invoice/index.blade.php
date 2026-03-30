@@ -82,11 +82,11 @@
                     <p class="text-center" font-size="13px">
                         {{ $setup->show_phone == 1 ? 'Telp : ' . $setup->phone : '' }} </p>
 
-                    @if ($setup->show_logo)
+                    {{-- @if ($setup->show_logo)
                         <p class="text-center">
                             <image height="100px" style="text-align:center;" src="{{ asset('storage/' . $setup->logo) }}">
                         </p>
-                    @endif
+                    @endif --}}
                     <p class="text-center">
 
                         ===================================================
@@ -171,12 +171,12 @@
                     <p id="note"></p>
                     <p class="text-center"> {{ $setup->footer_note }} </p>
                     <p class="text-center"> {{ $setup->footer_message }} </p>
-                    @if ($setup->show_qris)
+                    {{-- @if ($setup->show_qris)
                         <p class="text-center">
                             <image height="100px" style="text-align:center;"
                                 src="{{ asset('storage/' . $setup->qris_image) }}">
                         </p>
-                    @endif
+                    @endif --}}
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-warning" id="btn-print"><i class="bx bx-printer"></i> &nbsp; Print
@@ -187,6 +187,7 @@
             </div>
         </div>
     </div>
+    <iframe id="print-frame" name="print-frame" style="display:none;"></iframe>
 
     <!-- End Vertically centered Modal-->
 @endsection
@@ -247,7 +248,7 @@
                 success: function(res) {
 
                     $('#customer_customer').text(res.data.customer_name)
-                    $('#tanggal_transaksi').text(res.data.created_date);
+                    $('#tanggal_transaksi').text(convertTime(res.data.created_at));
                     $('#kasir').text(res.data.kasir_name);
                     $('#invoice').text(res.data.code_sale);
                     $('#sub_total').text(res.data.sub_total);
@@ -291,56 +292,78 @@
             })
         }
 
-        function printUlang(id) {
-            Swal.fire({
-                title: "<h5>Kamu yakin ingin melanjutkan proses ini ?</h5>",
-                showCancelButton: true,
-                confirmButtonText: "Ya",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: "{{ route('invoice.prePrint') }}",
-                        type: 'post',
-                        data: {
-                            _token: '{{ csrf_token() }}',
-                            id_sale: id
-                        },
-                        beforeSend: function() {
-                            Swal.fire({
-                                title: 'Mohon Tunggu...',
-                                html: 'Sedang Memproses data',
-                                allowOutsideClick: false,
-                                didOpen: () => {
-                                    Swal.showLoading();
-                                }
-                            })
-                        },
-                        success: function(res) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil !',
-                                text: res.desc,
-                                time: 2000
-                            });
-                            setTimeout(() => {
-                                Swal.close();
-                            }, 1500);
-                        },
-                        error: function(err) {
-                            Swal.close();
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Gagal !',
-                                text: err.responseJSON.message
-                            })
-                        },
-                        complete: function() {
+        function convertTime(waktu) {
+            let date = new Date(waktu);
 
-                        }
-                    })
-                }
-                return false;
-            })
+            let tahun = date.getFullYear();
+            let bulan = String(date.getMonth() + 1).padStart(2, '0');
+            let hari = String(date.getDate()).padStart(2, '0');
+            let jam = String(date.getHours()).padStart(2, '0');
+            let menit = String(date.getMinutes()).padStart(2, '0');
+
+            let hasil = `${tahun}-${bulan}-${hari} ${jam}:${menit}`;
+            return hasil;
+        }
+
+        function printUlang(id) {
+
+            let url = "{{ route('print.struk', ':id') }}";
+
+            // Ganti :id dengan ID yang didapat dari response simpan kasir
+            url = url.replace(':id', id);
+
+            // Buka di tab baru
+            // window.open(url, '_blank');
+            $('#print-frame').attr('src', url);
+            // Swal.fire({
+            //     title: "<h5>Kamu yakin ingin melanjutkan proses ini ?</h5>",
+            //     showCancelButton: true,
+            //     confirmButtonText: "Ya",
+            // }).then((result) => {
+            //     if (result.isConfirmed) {
+            //         $.ajax({
+            //             url: "{{ route('invoice.prePrint') }}",
+            //             type: 'post',
+            //             data: {
+            //                 _token: '{{ csrf_token() }}',
+            //                 id_sale: id
+            //             },
+            //             beforeSend: function() {
+            //                 Swal.fire({
+            //                     title: 'Mohon Tunggu...',
+            //                     html: 'Sedang Memproses data',
+            //                     allowOutsideClick: false,
+            //                     didOpen: () => {
+            //                         Swal.showLoading();
+            //                     }
+            //                 })
+            //             },
+            //             success: function(res) {
+            //                 Swal.fire({
+            //                     icon: 'success',
+            //                     title: 'Berhasil !',
+            //                     text: res.desc,
+            //                     time: 2000
+            //                 });
+            //                 setTimeout(() => {
+            //                     Swal.close();
+            //                 }, 1500);
+            //             },
+            //             error: function(err) {
+            //                 Swal.close();
+            //                 Swal.fire({
+            //                     icon: 'error',
+            //                     title: 'Gagal !',
+            //                     text: err.responseJSON.message
+            //                 })
+            //             },
+            //             complete: function() {
+
+            //             }
+            //         })
+            //     }
+            //     return false;
+            // })
 
 
         }

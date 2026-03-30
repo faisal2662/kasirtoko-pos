@@ -219,7 +219,7 @@ class ProductController extends Controller
             $product->selling_price = str_replace(',', '', $request->selling_price);
             $product->price_grosir = str_replace(',', '', $request->price_grosir);
             $product->content_per_unit = $request->content_per_unit;
-            $product->stock = $stock;
+            // $product->stock = $stock;
             $product->purchase_unit_id = $request->purchase_unit_id;
             $product->min_stock = $request->min_stock;
             $product->unit_id = $request->unit;

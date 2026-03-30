@@ -1,11 +1,15 @@
  <!-- ======= Header ======= -->
+ @php
 
+     $setup = DB::table('store_settings')->first();
+
+ @endphp
  <header id="header" class="header fixed-top d-flex align-items-center">
 
      <div class="d-flex align-items-center justify-content-between">
          <a href="/dashboard" class="logo d-flex align-items-center">
              {{-- <img src="{{ asset('img/logo.png') }}" alt=""> --}}
-             <span class="d-none d-lg-block">Toko Jaya Makmur</span>
+             <span class="d-none d-lg-block"> {{ $setup->store_name }} </span>
          </a>
          <i class="bi bi-list toggle-sidebar-btn"></i>
      </div><!-- End Logo -->

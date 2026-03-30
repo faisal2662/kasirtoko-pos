@@ -55,7 +55,7 @@ class UserController extends Controller
             'username' => 'required|unique:users',
             'role_id' =>'required',
             'password' => 'required',
-            'address' => 'required'
+            // 'address' => 'required'
         ],
         [
             'name' => 'name lebih dari 50 karakter',

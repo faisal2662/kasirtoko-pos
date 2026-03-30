@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductInController;
 use App\Http\Controllers\ProductOutController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QZController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportUnitController;
 use App\Http\Controllers\RoleCustomerController;
@@ -55,15 +56,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/result', [SaleController::class, 'result']);
     Route::post('/dashboard/sale', [SaleController::class, 'store'])->name('sale.store');
     Route::post('/dashboard/sale/print', [SaleController::class, 'print']);
-    Route::get("/get-data-populer", [SaleController::class,'getDataPopuler'])->name('sale.getPopuler');
-
+    Route::get("/get-data-populer", [SaleController::class, 'getDataPopuler'])->name('sale.getPopuler');
+    Route::get('/print_struk/{id}', [SaleController::class, 'printStrukv2'])->name('print.struk');
 
     Route::prefix('customer')->group(function () {
 
         // customer pages
         Route::get('/dashboard/customer', [CustomerController::class, 'index'])->name('customer.index');
         Route::get('/dashboard/customer-add', [CustomerController::class, 'create']);
-        Route::get('/get-customer',[CustomerController::class,'getData'])->name('customer.getData');
+        Route::get('/get-customer', [CustomerController::class, 'getData'])->name('customer.getData');
         Route::get('/customer-datatable', [CustomerController::class, 'datatable'])->name('customer.datatable');
         Route::post('/dashboard/customer-add', [CustomerController::class, 'store'])->name('customer.store');
         Route::get('/dashboard/customer/edit/{code_customer}', [CustomerController::class, 'edit'])->name('customer.edit');
@@ -154,25 +155,29 @@ Route::middleware('auth')->group(function () {
             Route::get('/destroy/{id}', [RoleCustomerController::class, 'destroy'])->name('role_customer.destroy');
         });
 
-        Route::prefix('store-setting')->group(function(){
-            Route::get('/', [StoreSettingController::class,'index'])->name('store_setting');
+        Route::prefix('store-setting')->group(function () {
+            Route::get('/', [StoreSettingController::class, 'index'])->name('store_setting');
             Route::post('/store', [StoreSettingController::class, 'store'])->name('store_setting.store');
-
         });
     });
 
-    Route::prefix('invoice')->group(function(){
+    Route::prefix('invoice')->group(function () {
         Route::get('/', [InvoiceController::class, 'index'])->name('invoice.index');
-        Route::get('/datatable', [InvoiceController::class,'datatable'])->name('invoice.datatable');
-        Route::get('/show/{id}', [InvoiceController::class,'show'])->name('invoice.show');
-        Route::post('/print-ulang', [InvoiceController::class,'prePrint'])->name('invoice.prePrint');
-        });
+        Route::get('/datatable', [InvoiceController::class, 'datatable'])->name('invoice.datatable');
+        Route::get('/show/{id}', [InvoiceController::class, 'show'])->name('invoice.show');
+        Route::post('/print-ulang', [InvoiceController::class, 'prePrint'])->name('invoice.prePrint');
+    });
 
 
     // laporan keuangan
     Route::get('/dashboard/report', [ReportController::class, 'index']);
     Route::get('/dashboard/report-cek', [ReportController::class, 'cekReport']);
     Route::get('/dashboard/report-print', [ReportController::class, 'print']);
+    Route::get('/dashboard/report/report-days', [ReportController::class, 'reportDay'])->name('report.day');
+    Route::get('/dashboard/report/report-detail', [ReportController::class,'reportDetail'])->name('report.detail.day');
+    Route::get('/dashboard/report/report-selling-product', [ReportController::class,'reportSellingProduct'])->name('report.selling_product');
+    Route::get('/dashboard/report/cash_flow', [ReportController::class, 'reportKas'])->name('report.cash_flow');
+    Route::get('/dashboard/report/report-product-pajak', [ReportController::class, 'reportProductPajak'])->name('report.product.pajak');
 
     // laporan barang
     Route::get('/dashboard/report/unit', [ReportUnitController::class, 'index']);
@@ -184,4 +189,14 @@ Route::middleware('auth')->group(function () {
     Route::put('/dashboard/user-edit/{id}', [UserController::class, 'update'])->name('user.update');
     Route::delete('/dashboard/user-delete/{id}', [UserController::class, 'destroy'])->name('user.destroy');
     Route::put('/dashboard/user-pass/{id}', [UserController::class, 'passUpdate'])->name('user.pass.update');
+
+
+    Route::get('/qz-sign', [QZController::class, 'sign']);
+    Route::get('/qz-cert', [QZController::class, 'cert']);
+
+    Route::prefix('configuration')->group(function(){
+        Route::prefix('menu')->group(function(){
+            Route::get('/', [MenuController::class,'index'])->name('menu.index');
+        });
+    });
 });

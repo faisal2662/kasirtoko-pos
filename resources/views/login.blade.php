@@ -78,21 +78,10 @@
                                                 id="yourPassword" required>
                                             <div class="invalid-feedback">Masukkan password</div>
                                         </div>
-
-                                        <div class="col-12">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="remember"
-                                                    value="true" id="rememberMe">
-                                                <label class="form-check-label" for="rememberMe">Remember me</label>
-                                            </div>
-                                        </div>
                                         <div class="col-12">
                                             <button class="btn btn-primary w-100" type="submit">Masuk</button>
                                         </div>
-                                        <div class="col-12">
-                                            <p class="small mb-0">belum punya akun ?<a href="pages-register.html">
-                                                    Daftar</a></p>
-                                        </div>
+
                                     </form>
 
                                 </div>

@@ -32,6 +32,11 @@ class Product extends Model
         return $this->hasOne(category::class, 'slug', 'category_id');
     }
 
+    public function saleDetail(): HasMany
+    {
+        return $this->hasMany(SaleDetail::class,'product_id', 'id');
+    }
+
     /**
      * Get the unit associated with the Product
      *

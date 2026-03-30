@@ -113,10 +113,19 @@ class SaleController extends Controller
             for ($i = 0; $i < count($request->qty); $i++) {
 
                 $baris = $request->baris[$i];
-                $unit = Unit::where('id', $request->unit_used_ . $baris)->where('is_deleted', 'N')->first();
+                $unit_used = $request->input('unit_used_' . $baris);
+                $unit = Unit::where('id', $unit_used)->where('is_deleted', 'N')->first();
                 $product = Product::where('id', $request->product_id[$i])->first();
+                if (!$product) {
+                    DB::rollBack();
+                    return response()->json(['status' => 'failed', 'message' => 'Terjadi Kesalahan : product tidak ditemukan'], 500);
+                }
+                if(!$unit){
+                    DB::rollback();
+                    return response()->json(['status' => 'failed', 'message' => 'Terjadi Kesalahan : unit tidak ditemukan'],500);
+                }
                 $qty = $request->qty[$i];
-                if ($unit->type == 'MULTIPLE') {
+                if ( isset($unit) && $unit->type == 'MULTIPLE') {
                     $qty = $request->qty[$i] * $product->content_per_unit;
                 }
 
@@ -127,7 +136,7 @@ class SaleController extends Controller
                 $sale_detail->product_id = $request->product_id[$i];
                 $sale_detail->customer_id = $customer_id;
                 $sale_detail->quantity = $qty;
-                $sale_detail->unit_used = $request->unit_used_ . $baris;
+                $sale_detail->unit_used = $unit_used;
                 $sale_detail->disc = $request->diskon;
                 $sale_detail->unit_price = $request->harga_satuan[$i];
                 $sale_detail->price = $request->harga_total[$i];
@@ -165,14 +174,25 @@ class SaleController extends Controller
             $payment->total = $request->jumtot;
             $payment->created_by = Auth::user()->id;
             $payment->save();
-
-            // if(isset($request->cetak) && $request->cetak == 'cetak'){
-
-            $this->printReceipt($sale->id, str_replace(',', '', $request->sub_total), str_replace(',', '', $request->bayar_customer), str_replace(',', '', $request->kembalian));
-            // }
+            $getSale = collect();
+            $setup = null;
+            // if (isset($request->cetak) && $request->cetak == 'cetak') {
+            $getSale = Sale::with('saleDetail.product')->where('id', $sale->id)->first();
+            if ($getSale) {
+                $getSale->created_at = Carbon::parse($getSale->created_at)->translatedFormat('Y-m-d H:i');
+            }
+            $setup = StoreSetting::first();
+            $name_customer = $getSale->name;
+            if ($getSale->name == '' || $getSale->name == null) {
+                $name_customer = Customer::where('id', $getSale->customer_id)->first()->name ?? '';
+                // }
+            }
+            $getSale->name_customer = $name_customer;
+            // $this->printReceipt($sale->id, str_replace(',', '', $request->sub_total), str_replace(',', '', $request->bayar_customer), str_replace(',', '', $request->kembalian));
 
             DB::commit();
-            return response()->json(['status' => 'success', 'desc' => 'Data Tersimpan'], 200);
+
+            return response()->json(['status' => 'success', 'desc' => 'Data Tersimpan',  'sale' => $getSale, 'setup' => $setup], 200);
             Alert::toast('Data Tersimpan', 'success');
             return redirect()->back();
         } catch (\Throwable $th) {
@@ -181,6 +201,24 @@ class SaleController extends Controller
             return response()->json(['status' => 'failed', 'message' => 'Terjadi Kesalahan dalam menyimpan', $th->getMessage(), $th->getLine(), $request->all()], 500);
             return throw $th;
         }
+    }
+
+    public function printStrukv2($id)
+    {
+        $sale = Sale::with('saleDetail.product')
+            ->join('users', 'users.id', 'sales.created_by')
+            ->select('sales.*', 'users.name as kasir_name')
+            ->find($id);
+        $name_customer = $sale->name;
+        if ($sale->name == '' || $sale->name == null) {
+            $name_customer = Customer::where('id', $sale->customer_id)->first()->name ?? '';
+            // }
+            // $this->printReceipt($sale->id, str_replace(',', '', $request->sub_total), str_replace(',', '', $request->bayar_customer), str_replace(',', '', $request->kembalian));
+        }
+        $sale->name_customer = $name_customer;
+
+        $setup = StoreSetting::first();
+        return view('dashboard.sale.print_struk', compact('setup', 'sale'));
     }
 
     public function generateInvoiceDetailCode()
@@ -362,7 +400,7 @@ class SaleController extends Controller
         $sale = Sale::with('saleDetail.product')->where('id', $id)->first();
         $setup = StoreSetting::first();
         $name_customer = $sale->name;
-        if($sale->name == '' || $sale->name == null){
+        if ($sale->name == '' || $sale->name == null) {
             $name_customer = Customer::where('id', $sale->customer_id)->first()->name ?? '';
         }
 
@@ -473,7 +511,7 @@ class SaleController extends Controller
             $printer->setJustification(Printer::JUSTIFY_CENTER);
 
             $printer->text($setup->footer_note . "\n\n");
-            $printer->text($setup->footer_message . "\n\n\n\n");
+            $printer->text($setup->footer_message . "\n\n\n");
 
             /*
         IMAGE PROMO / QR

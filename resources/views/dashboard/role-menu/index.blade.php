@@ -1,7 +1,7 @@
 @extends('dashboard.layouts.main')
 @section('container')
 @section('title')
-    Kasir
+    Menu | kasir
 @endsection
 @include('sweetalert::alert')
 <style>

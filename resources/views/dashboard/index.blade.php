@@ -43,11 +43,8 @@
 
                             </div>
                         </div>
-
                     </div><!-- End Customers Card -->
 
-                    <hr>
-                    <!-- Sales Card -->
                     <div class="col-xxl-4 col-md-6">
                         <div class="card info-card sales-card">
                             <div class="filter">
@@ -97,8 +94,82 @@
                             </div>
                         </div>
                     </div><!-- End Revenue Card -->
+
+                    <hr>
+                    <!-- Sales Card -->
                 </div>
             </div><!-- End Left side columns -->
         </div>
+        <div class="row">
+
+            <div class="col-md-3">
+                <div class="card info-card customers-card">
+                    <div class="card-body">
+                       <div class="card-title">
+
+                           Penjualan Hari Ini
+                    </div>
+                        <h4>Rp {{ number_format($todaySale) }}</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card info-card">
+                    <div class="card-body">
+                        <div class="card-title">Jumlah Transaksi</div>
+                        <h4>{{ $todayTransactions }}</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card info-card">
+                    <div class="card-body">
+                        <div class='card-title'>Produk Terjual</div>
+                        <h4>{{ $todayProduct }}</h4>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <div class="row justify-content-center">
+            <div class="col-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-title">Graik Penjualan</div>
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <script>
+            let labels = [
+                @foreach ($salesChart as $row)
+                    "{{ $row->tanggal }}",
+                @endforeach
+            ];
+
+            let data = [
+                @foreach ($salesChart as $row)
+                    {{ $row->total }},
+                @endforeach
+            ];
+
+            new Chart(document.getElementById("salesChart"), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Penjualan',
+                        data: data
+                    }]
+                }
+            });
+        </script>
     </section>
 @endsection

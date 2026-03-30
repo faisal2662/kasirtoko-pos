@@ -76,7 +76,7 @@ class StoreSettingController extends Controller
                 $image = $manager->read($file->getPathname());
 
                 // resize tinggi max 120
-                $image->scale(height: 120);
+                $image->scale(height: 150);
 
                 Storage::disk('public')->put(
                     'setup-print/' . $namaFile,
@@ -101,7 +101,7 @@ class StoreSettingController extends Controller
                 $image = $manager->read($file->getPathname());
 
                 // resize tinggi max 120
-                $image->scale(height: 120);
+                $image->scale(width:300);
 
                 Storage::disk('public')->put(
                     'setup-print/' . $namaFile,

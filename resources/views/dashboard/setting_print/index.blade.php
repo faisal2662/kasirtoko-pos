@@ -67,7 +67,7 @@
                                         value="{{ basename($setup->logo) ?? '' }}" class="form-control"> </div>
                             </div>
                             @if ($setup->logo != '' || $setup->logo != null)
-                                <div class="row ">
+                                <div class="row " style="display: none;">
                                     <div class="col-lg-3 col-md-4 label ">Tampilan Logo</div>
                                     <div class="col-lg-9 col-md-8"><img id="image-logo" style="max-height: 250px;"
                                             src="{{ asset('storage/' . $setup->logo) }}" class="rounded mx-auto d-block"
@@ -92,7 +92,7 @@
                                         value="{{ basename($setup->qris_image) ?? '' }}" class="form-control"> </div>
                             </div>
                             @if ($setup->qris_image != '' || $setup->qris_image != null)
-                                <div class="row ">
+                                <div class="row " style="display: none">
                                     <div class="col-lg-3 col-md-4 label ">Tampilan Qris</div>
                                     <div class="col-lg-9 col-md-8"><img id="image-qris" style="max-height: 250px;"
                                             src="{{ asset('storage/' . $setup->qris_image) }}"

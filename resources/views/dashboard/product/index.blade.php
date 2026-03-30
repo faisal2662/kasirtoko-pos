@@ -1,7 +1,7 @@
 @extends('dashboard.layouts.main')
 
 @section('title')
-    Kasir | Product
+    Product | Kasir
 @endsection
 @section('container')
     <h3>Barang</h3>
@@ -270,6 +270,7 @@
                         timer: 1500
                     });
                     $('#modalStockAdjust').modal('hide');
+                    $('#input_stock_adjust').val('')
                     showData(product_id);
                     $('#product-id-adjust').val('');
                     table.ajax.reload()

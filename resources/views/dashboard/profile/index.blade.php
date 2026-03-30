@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    <title>Dashboard - NiceAdmin Bootstrap Template</title>
+    <title>Profil | kasir</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
 
@@ -128,7 +128,7 @@
                     <button data-bs-toggle="modal" data-bs-target="#ubahData" class="btn btn-success "
                         style="margin-left:30px; margin-top: 18px">Ubah
                         Data</button>
-                    <a href="/dashboard" class="btn btn-secondary mt-3 " style="float: right;">Kembali</a>
+                    <a href="{{ route('dashboard') }}" class="btn btn-secondary mt-3 " style="float: right;">Kembali</a>
                 </div>
             </div>
         </section>

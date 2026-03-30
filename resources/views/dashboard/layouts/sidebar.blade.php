@@ -55,16 +55,16 @@
                     class="bi bi-chevron-down ms-auto"></i>
             </a>
             <ul id="tables-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-                <li>
+                {{-- <li>
                     <a href="{{ route('product.in') }}" @if (Request::is('dashboard/productIn') || Request::is('dashboard/historyProduct/{slug}')) class="active" @endif>
                         <i class="bi bi-circle"></i><span>Barang Masuk</span>
                     </a>
-                </li>
-                <li>
+                </li> --}}
+                {{-- <li>
                     <a href="{{ route('product') }}" class="{{ Request::is('dashboard/product') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Daftar Barang</span>
                     </a>
-                </li>
+                </li> --}}
                 <li>
                     <a href="{{ route('category') }}" class="{{ Request::is('dashboard/category') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Category</span>
@@ -102,6 +102,14 @@
 
         {{-- barang keluar --}}
         <li class="nav-item">
+            <a class="nav-link {{ Request::is('dashboard/product') ? '' : 'collapsed' }} "
+                href="{{ route('product') }}">
+               <i class="bi bi-box-arrow-in-down"></i>
+                <span>Stock Barang </span>
+            </a>
+        </li>
+        {{-- barang keluar --}}
+        <li class="nav-item">
             <a class="nav-link {{ Request::is('dashboard/productIn') ? '' : 'collapsed' }} "
                 href="{{ route('product.in') }}">
                <i class="bi bi-box-arrow-in-down"></i>
@@ -115,13 +123,13 @@
                 <span>Invoice</span>
             </a>
         </li>
-        <li class="nav-item">
+        {{-- <li class="nav-item">
             <a class="nav-link {{ Request::is('dashboard/productOut') ? '' : 'collapsed' }} "
                 href="/dashboard/productOut">
                 <i class="bi bi-box-arrow-up"></i>
                 <span>Barang Keluar</span>
             </a>
-        </li>
+        </li> --}}
         <li class="nav-item">
             <a class="nav-link {{ Request::is('supplier') ? '' : 'collapsed' }} "
                 href="{{ route('supplier') }}">
@@ -140,11 +148,37 @@
         <li class="nav-heading">Laporan</li>
 
         <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#laporan" data-bs-toggle="collapse" href="#">
+            <a class="nav-link {{ Request::is('dashboard/report/*')  ? '' : 'collapsed'}}" data-bs-target="#laporan" data-bs-toggle="collapse" href="#">
                 <i class="bi bi-bar-chart"></i><span>Laporan</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
             <ul id="laporan" class="nav-content collapse" data-bs-parent="#laporan">
                 <li>
+                    <a href="{{ route('report.day') }}" class="{{ Request::is('dashboard/report') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Laporan Harian</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('report.detail.day') }}" class="{{ Request::is('dashboard/report') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Laporan Detail Transaksi </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('report.selling_product') }}" class="{{ Request::is('dashboard/report') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Laporan Produk Terjual </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('report.cash_flow') }}" class="{{ Request::is('dashboard/report') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Laporan Kas </span>
+                    </a>
+                </li>
+
+                   <li>
+                    <a href="{{ route('report.product.pajak') }}" class="{{ Request::is(route('report.product.pajak')) ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Laporan Produk Pajak </span>
+                    </a>
+                </li>
+                {{-- <li>
                     <a href="/dashboard/report" class="{{ Request::is('dashboard/report') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Laporan Keuangan</span>
                     </a>
@@ -154,11 +188,25 @@
                         class="{{ Request::is('dashboard/report/unit') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Laporan Barang Keluar</span>
                     </a>
-                </li>
+                </li> --}}
             </ul>
         </li><!-- End Charts Nav -->
+        <li class="nav-heading"> Konfigurasi </li>
 
-
+   <li class="nav-item">
+            <a class="nav-link {{ Request::is('invoice/') ? '' : 'collapsed' }} "
+                href="{{ route('invoice.index') }}">
+              <i class="bi bi-three-dots-vertical"></i>
+                <span>Role Menu</span>
+            </a>
+        </li>
+   <li class="nav-item">
+            <a class="nav-link {{ Request::is('invoice/') ? '' : 'collapsed' }} "
+                href="{{ route('invoice.index') }}">
+               <i class="bi bi-menu-button-wide"></i>
+                <span>Menu</span>
+            </a>
+        </li>
 
 
 
