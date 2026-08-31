@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sale;
 use App\Models\StoreSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
@@ -27,7 +28,7 @@ class StoreSettingController extends Controller
     {
         $manager = new ImageManager(new Driver());
         try {
-
+            DB::beginTransaction();
             $setup = StoreSetting::where('id', $request->id_store_setting)->first();
             $setup->store_name = $request->store_name;
             $setup->name_printer = $request->name_printer;
@@ -74,14 +75,19 @@ class StoreSettingController extends Controller
                 $namaFile = time() . '_' . $file->getClientOriginalName();
 
                 $image = $manager->read($file->getPathname());
+                $path_logo = public_path('storage/setup-print/' . $namaFile);
 
+                // Pastikan folder setup-print sudah ada atau buat otomatis
+                // if (!file_exists(public_path('setup-print'))) {
+                //     mkdir(public_path('setup-print'), 0755, true);
+                // }
                 // resize tinggi max 120
-                $image->scale(height: 150);
+                $image->scale(height: 150)->save($path_logo);
 
-                Storage::disk('public')->put(
-                    'setup-print/' . $namaFile,
-                    (string) $image->encode()
-                );
+                // Storage::disk('public')->put(
+                //     'setup-print/' . $namaFile,
+                //     (string) $image->encode()
+                // );
 
                 $pathFileLogo = 'setup-print/' . $namaFile;
 
@@ -100,13 +106,20 @@ class StoreSettingController extends Controller
 
                 $image = $manager->read($file->getPathname());
 
-                // resize tinggi max 120
-                $image->scale(width:300);
+                $path_qris = public_path('storage/setup-print/' . $namaFile);
 
-                Storage::disk('public')->put(
-                    'setup-print/' . $namaFile,
-                    (string) $image->encode()
-                );
+                // Pastikan folder setup-print sudah ada atau buat otomatis
+                // if (!file_exists(public_path('setup-print'))) {
+                //     mkdir(public_path('setup-print'), 0755, true);
+                // }
+                // resize tinggi max 120
+                $image->scale(width: 300)->save($path_qris);
+
+                // Storage::disk('public')->put(
+                //     'setup-print/' . $namaFile,
+                //     (string) $image->encode()
+                // );
+                // $file->move(public_path('images'), $filename);
 
                 $pathFileQris = 'setup-print/' . $namaFile;
 
@@ -118,10 +131,12 @@ class StoreSettingController extends Controller
 
 
             $setup->save();
+            DB::commit();
 
             return response()->json(['status' => 'success', 'desc' => 'Data Tersimpan', 'path_logo' => $pathFileLogo, 'path_qris' => $pathFileQris], 200);
         } catch (\Throwable $th) {
             //throw $th;
+            DB::rollBack();
             return response()->json(['status' => 'failed', 'message' => 'Terjadi kesalahan saat menyimpan', $th->getMessage(), $th->getLine()], 500);
         }
     }

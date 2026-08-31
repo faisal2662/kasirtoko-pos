@@ -42,11 +42,11 @@
                                     <tr>
                                         <th scope="col">No.</th>
                                         <th scope="col">Nama</th>
-                                        <th scope="col">Kategory</th>
-                                        <th scope="col">Harga Beli </th>
+                                        {{-- <th scope="col">Kategory</th> --}}
+                                        {{-- <th scope="col">Harga Beli </th> --}}
                                         <th scope="col">Harga Jual </th>
                                         <th scope="col">Satuan</th>
-                                        <th scope="col">Stok</th>
+                                        {{-- <th scope="col">Stok</th> --}}
                                         <th scope="col" width="150">Aksi</th>
                                     </tr>
                                 </thead>
@@ -77,7 +77,7 @@
                         <div class="col-4 fw-bold">Nama Barang</div>
                         <div class="col-8"><span id="name_product"></span></div>
                     </div>
-                    <div class="row mb-2">
+                    <div class="row mb-2" style="display: none;">
                         <div class="col-4 fw-bold">Kategori</div>
                         <div class="col-8"><span id="category"></span></div>
                     </div>
@@ -93,7 +93,7 @@
                         <div class="col-4 fw-bold">Isi Per Pembelian</div>
                         <div class="col-8"><span id="content_per_unit"></span></div>
                     </div>
-                    <div class="row  mb-2">
+                    <div class="row  mb-2" style="">
                         <div class="col-4 fw-bold">Harga Beli</div>
                         <div class="col-8"><span id="purchase_price" class="rupiah"></span></div>
                     </div>
@@ -105,13 +105,18 @@
                         <div class="col-4 fw-bold">Harga Jual per dus/karton</div>
                         <div class="col-8"><span id="price_grosir" class="rupiah"></span></div>
                     </div>
-                    <div class="row mb-2">
+                    <div class="row mb-2" style="display: none;">
                         <div class="col-4 fw-bold">Stok</div>
-                        <div class="col-8"><span id="stock"></span> <span class="float-end"><button id="adjust-stock"
-                                    data-product_id="" onclick="adjustStock(this)" class="btn btn-warning">Sesuaikan
-                                    Stock</button></span></div>
+                        <div class="col-8">
+                            <span id="stock"></span>
+                            {{-- <span class="float-end">
+                                <button id="adjust-stock" data-product_id="" onclick="adjustStock(this)"
+                                    class="btn btn-warning">Sesuaikan
+                                    Stock</button>
+                            </span> --}}
+                        </div>
                     </div>
-                    <div class="row mb-2">
+                    <div class="row mb-2" style="display:none;">
                         <div class="col-4 fw-bold">Minimal Stock</div>
                         <div class="col-8"><span id="min_stock"></span></div>
                     </div>
@@ -167,21 +172,14 @@
                     {
                         data: 'name'
                     },
-                    {
-                        data: 'categories_name'
-                    },
-                    {
-                        data: 'purchase_price'
-                    },
+
                     {
                         data: 'selling_price'
                     },
                     {
                         data: 'short'
                     },
-                    {
-                        data: 'stock'
-                    },
+
                     {
                         data: 'action'
                     }

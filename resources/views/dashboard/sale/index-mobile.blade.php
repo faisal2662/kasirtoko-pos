@@ -11,6 +11,10 @@
         color: #b8aeae;
     }
 
+    #main {
+        padding: 20px 5px !important;
+    }
+
     .select2-container .select2-selection--single {
         padding: 5px !important;
         height: 40px !important;
@@ -39,79 +43,12 @@
         </ol>
     </nav>
 
-    <div class="row">
+    <div class="">
 
-        <div class="col-12 col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    {{-- <div class="float-end mt-3"><i class="bx bx-refresh-cw-alt bx-spin"></i></div> --}}
-                    <h5 class="card-title"> Penjualan </h5>
-                    <form class="row g-3">
-                        {{-- <div class="col-md-12">
-                            <label for="name" class="form-label">Nama Pembeli</label>
-                            <input type="text" name="name" class="form-control" id="name">
-                        </div> --}}
-                        <div class="col-md-12" style="position: relative;">
-                            <label for="nambar" class="form-label">Cari Barang</label>
-                            <li class="list-group-item">
+        {{-- <div class="col-12 col-md-4 d-none" id="cariBarang">
 
-                                <input type="text" class="form-control" autofocus id="nambar"
-                                    onInput="fetchData()" name="nambar">
-                            </li>
-                            <ul class="list-group" id="tbodyfordata" style="width:96%;z-index:1; position: absolute;">
-                                {{-- <li class="list-group-item" onclick="tes()">lkfhjsd</li>
-                                <li class="list-group-item">lkfhjsd</li> --}}
-                            </ul>
-                        </div>
-                        <div style="display:none;">
-                            <div class="col-md-12">
-                                <label for="nambar" class="form-label">Kode Barang</label>
-                                <input type="text" disabled name="name" class="form-control" id="kodbar">
-                            </div>
-                            <div class="col-6">
-                                <label for="harsat" class="form-label">Harga Satuan</label>
-                                <input type="text" class="form-control rupiah" id="harsat" disabled>
-                            </div>
-                            <div class="col-6">
-                                <label for="jumbel" class="form-label">Jumlah Beli</label>
-                                <input type="number" name="quantity" class="form-control" id="jumbel">
-                            </div>
-                            <div class="col-md-12">
-                                <label for="jumlah" class="form-label">Jumlah</label>
-                                <input type="text" class="form-control rupiah" name="jumlah" id="jumlah"
-                                    disabled>
-                            </div>
-                            <div class="text-center">
-                                <button type="button" class="btn btn-primary" id="tambah"
-                                    name="tambah">Tambah</button>
-                                <button type="reset" class="btn btn-secondary" onclick="reset()">Reset</button>
-                            </div>
-                            {{-- <span class="jumlah_barang_${id_product} fw-bold" data-jumlah="1"
-                            style="border-bottom: 1px solid #000;width:10px;">1</span> --}}
-                        </div>
-                    </form>
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <h5>Barang populer</h5>
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>No.</th>
-                                        <th>Nama Product</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="container-populer-barang">
-
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-        <div class="col-md-8 col-12">
+        </div> --}}
+        <div class=" ">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title text-center fs-4"> {{ $setup->store_name }} </h5>
@@ -119,7 +56,20 @@
                         {{ $setup->address . ' - ' . $setup->city }}
                         <hr>
                     </p>
-                    <form class="row g-3" action="/dashboard/sale" method="post" id="form-keranjang">
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <button class="btn btn-sm btn-primary" onclick="showCariBarang()"><i class="bx bx-box"></i>
+                                Cari Barang</button>
+                        </div>
+                        <div class="col-6">
+                            <a href="{{ route('invoice.index') }}" target="_blank"
+                                class="btn btn-sm btn-warning float-end"> <i class="bx bx-history"></i> Riwayat
+                            </a>
+
+
+                        </div>
+                    </div>
+                    <form class="row g-3" action="{{ route('sale.store') }}" method="post" id="form-keranjang">
                         @csrf
                         <div class="row">
                             <div class="col-md-4 col-12">
@@ -137,125 +87,194 @@
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" role="switch"
                                         id="pelanggan-checked">
-                                    <label class="form-check-label" for="pelanggan-checked">Pelanggan Terdaftar</label>
+                                    <label class="form-check-label" for="pelanggan-checked">Pelanggan
+                                        Terdaftar</label>
                                 </div>
                             </div>
-                            <div class="col-2 col-md-3">
-                                <div class="float-end mt-3"><a href="{{ route('invoice.index') }}" target="_blank"
-                                        class="btn btn-warning"> <i class="bx bx-history"></i> Riwayat Transaksi </a>
+
+                        </div>
+
+                        <div class="table_responsive" >
+                            <table class="table table-striped-columns" style="font-size:13px;">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Barang</th>
+                                        <th align="center">Satuan</th>
+                                        {{-- <th align="center">Harga Satuan</th> --}}
+                                        {{-- <th align="center">Jumlah Barang</th> --}}
+                                        <th>Harga Total</th>
+                                        <th>#</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody id="keranjang">
+
+                                </tbody>
+                                <hr>
+                                <tr>
+                                    <td colspan="4" style="background-color:#bfbfbf;"></td>
+                                </tr>
+                                <tbody>
+                                    <tr>
+                                        <td>Sub Total:</td>
+                                        <td colspan="3" class="text-center"> <input type="text" name="sub_total"
+                                                id="subTotal" style="text-align: center;" class="form-control rupiah"
+                                                readonly="readonly"> </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Diskon % :</td>
+                                        <td colspan="3" id="DiskonTotal"> <input type="text"
+                                                oninput="inputDiskon(this)" class="form-control" name="diskon"
+                                                id="input_diskon"> </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td>Potongan Harga:</td>
+                                        <td colspan="3" id="potonganHarga"> <input type="text" inputmode="numeric"
+                                                oninput="inputPothar(this)" class="form-control rupiah"
+                                                name="potongan_harga" id="potongan_harga">
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td>Jumlah Total:</td>
+                                        <td colspan="3" id="jumlahTotal" class="text-center"></td>
+                                        <input type="text" name="jumtot" hidden id="jumtotInput">
+                                    </tr>
+                                    <tr>
+                                        <td>Catatan Pembelian</td>
+                                        <td colspan="3">
+                                            <textarea name="catatan" id="catatan" cols="30" rows="2" class="form-control"></textarea>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Metode Pembayaran</td>
+                                        <td colspan="3">
+                                            <select name="metode_pembayaran" id="metode_pembayaran"
+                                                class="form-control">
+                                                <option value="cash">Cash</option>
+                                                <option value="transfer">Transfer</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="mt-1" style="font-size:13px;">
+                                <div class="row mb-3">
+                                    <div class="col-5">
+                                        <label for="bayar" class="form-label">Bayar</label>
+                                        <input type="text" name="bayar_customer" inputmode="numeric"
+                                            class="form-control rupiah" required id="bayar">
+                                    </div>
+                                    <div class="col-5">
+                                        <label for="kembalian" class="form-label">Kembalian</label>
+                                        <input type="text" name="kembalian" readonly class="form-control"
+                                            id="kembalian">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-
-                        <table class="table table-striped-columns" style="font-size:15px;">
-                            <thead>
-                                <tr>
-                                    <th>Nama Barang</th>
-                                    <th align="center">Satuan</th>
-                                    <th align="center">Harga Satuan</th>
-                                    <th align="center">Jumlah Barang</th>
-                                    <th>Harga Total</th>
-                                    <th>#</th>
-
-                                </tr>
-                            </thead>
-                            <tbody id="keranjang">
-                                {{-- <tr>
-
-                                <td> <input type="hidden" name="product_id[]" class="input_product_id_1">
-                                    Indomie</td>
-                                <td class="text-center">
-                                    <input type="hidden" name="harga_satuan[]" value="3000"
-                                        class="input_harga_satuan_1">
-                                    <span  class="harga_satuan_1 rupiah">3,000</span>
-                                </td>
-                                <td class="text-center">
-                                    <span style="font-size:20px;cursor:pointer;margin-right:30px;"
-                                    onclick="minusCurrent(this,1)"><i class="bx bx-minus-circle"></i></span>
-                                    <input type="hidden" name="qty[]" class="input_jumlah_unit_1">
-                                    <span class="jumlah_barang_1 fw-bold" data-jumlah="3"
-                                        style="border-bottom: 1px solid #000;width:10px;">3</span>
-                                    <span style="font-size:20px;cursor:pointer;margin-left:30px;"
-                                        onclick="tambahCurrent(this,1)"><i class="bx bx-plus-circle"></i></span>
-                                </td>
-                                <td>
-
-                                    <input type="hidden" name="harga_total[]" value="9000"
-                                        class="input_harga_total_1">
-                                    <span class="harga_total_1 rupiah"> 9,000 </span>
-                                </td>
-                            </tr> --}}
-                            </tbody>
-                            <hr>
-                            <tr>
-                                <td colspan="6" style="background-color:#bfbfbf;"></td>
-                            </tr>
-                            <tbody>
-                                <tr>
-                                    <td colspan="4">Sub Total:</td>
-                                    <td class="text-center"> <input type="text" name="sub_total" id="subTotal"
-                                            style="text-align: center;" class="form-control rupiah"
-                                            readonly="readonly"> </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4">Diskon % :</td>
-                                    <td id="DiskonTotal"> <input type="text" oninput="inputDiskon(this)"
-                                            class="form-control" name="diskon" id="input_diskon"> </td>
-
-                                </tr>
-                                <tr>
-                                    <td colspan="4">Potongan Harga:</td>
-                                    <td id="potonganHarga"> <input type="text" oninput="inputPothar(this)"
-                                            class="form-control rupiah" name="potongan_harga" id="potongan_harga">
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td colspan="4">Jumlah Total:</td>
-                                    <td id="jumlahTotal" class="text-center"></td>
-                                    <input type="text" name="jumtot" hidden id="jumtotInput">
-                                </tr>
-                                <tr>
-                                    <td colspan="4">Catatan Pembelian</td>
-                                    <td>
-                                        <textarea name="catatan" id="catatan" cols="30" rows="2" class="form-control"></textarea>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4">Metode Pembayaran</td>
-                                    <td>
-                                        <select name="metode_pembayaran" id="metode_pembayaran" class="form-control">
-                                            <option value="cash">Cash</option>
-                                            <option value="transfer">Transfer</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="mt-1">
-                            <div class="row">
-                                <div class="col-5">
-                                    <label for="bayar" class="form-label">Bayar</label>
-                                    <input type="text" name="bayar_customer" class="form-control rupiah" required
-                                        id="bayar">
-                                </div>
-                                <div class="col-5">
-                                    <label for="kembalian" class="form-label">Kembalian</label>
-                                    <input type="text" name="kembalian" readonly class="form-control"
-                                        id="kembalian">
-                                </div>
+                            <div class="text-center" style="font-size:13px;">
+                                <button type="submit" class="btn btn-primary" name="simpan"><i
+                                        class="bi bi-floppy"></i> &nbsp; Simpan</button>
+                                {{-- <input type="submit" value="Cetak" name="cetak" class="btn btn-secondary"> --}}
+                                <button class="btn btn-secondary" onclick="savePrint(this)" type="button"
+                                    value="cetak" name="cetak"><i class="bi bi-printer"></i> &nbsp; Simpan &
+                                    Cetak</button>
                             </div>
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary" name="simpan"><i
-                                    class="bi bi-floppy"></i> &nbsp; Simpan</button>
-                            {{-- <input type="submit" value="Cetak" name="cetak" class="btn btn-secondary"> --}}
-                            <button class="btn btn-secondary" onclick="savePrint(this)" type="button"
-                                value="cetak" name="cetak"><i class="bi bi-printer"></i> &nbsp; Simpan &
-                                Cetak</button>
-                        </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalCariBarang" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Mencari Barang</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card">
+                        <div class="card-body">
+                            {{-- <div class="float-end mt-3"><i class="bx bx-refresh-cw-alt bx-spin"></i></div> --}}
+                            <h5 class="card-title"> Penjualan </h5>
+                            <form class="row g-3">
+                                {{-- <div class="col-md-12">
+                            <label for="name" class="form-label">Nama Pembeli</label>
+                            <input type="text" name="name" class="form-control" id="name">
+                        </div> --}}
+                                <div class="col-md-12" style="position: relative;">
+                                    <label for="nambar" class="form-label">Cari Barang</label>
+                                    <li class="list-group-item">
+
+                                        <input type="text" class="form-control" autofocus id="nambar"
+                                            onInput="fetchData()" name="nambar">
+                                    </li>
+                                    <ul class="list-group" id="tbodyfordata"
+                                        style="width:96%;z-index:1; position: absolute;">
+                                        {{-- <li class="list-group-item" onclick="tes()">lkfhjsd</li>
+                                <li class="list-group-item">lkfhjsd</li> --}}
+                                    </ul>
+                                </div>
+                                <div style="display:none;">
+                                    <div class="col-md-12">
+                                        <label for="nambar" class="form-label">Kode Barang</label>
+                                        <input type="text" disabled name="name" class="form-control"
+                                            id="kodbar">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="harsat" class="form-label">Harga Satuan</label>
+                                        <input type="text" class="form-control rupiah" id="harsat" disabled>
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="jumbel" class="form-label">Jumlah Beli</label>
+                                        <input type="number" name="quantity" class="form-control" id="jumbel">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label for="jumlah" class="form-label">Jumlah</label>
+                                        <input type="text" class="form-control rupiah" name="jumlah"
+                                            id="jumlah" disabled>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="button" class="btn btn-primary" id="tambah"
+                                            name="tambah">Tambah</button>
+                                        <button type="reset" class="btn btn-secondary"
+                                            onclick="reset()">Reset</button>
+                                    </div>
+                                    {{-- <span class="jumlah_barang_${id_product} fw-bold" data-jumlah="1"
+                            style="border-bottom: 1px solid #000;width:10px;">1</span> --}}
+                                </div>
+                            </form>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h5>Barang populer</h5>
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>No.</th>
+                                                <th>Nama Product</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="container-populer-barang">
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+
                 </div>
             </div>
         </div>
@@ -269,7 +288,7 @@
         <script>
             $(document).ready(function() {
                 $('.rupiah').number(true, 0)
-                $('body').addClass('toggle-sidebar')
+                // $('body').addClass('toggle-sidebar')
                 // console.log(window.location.origin);
                 // --- Konfigurasi ---
                 const $se = $('#nambar');
@@ -639,18 +658,17 @@
                 }, 60000);
             });
 
-            function getDeviceType() {
-                const mobileUA = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-                const mobileScreen = window.matchMedia("(max-width: 768px)").matches;
-
-                return (mobileUA || mobileScreen) ? "mobile" : "desktop";
-            }
-            if (getDeviceType() == 'mobile') {
-                window.location.replace("{{ route('sale') }}" + '?mobile=true')
+            function showCariBarang() {
+                $('#modalCariBarang').modal('show')
             }
 
+            function showCard(tag) {
+                const card = document.getElementById(tag);
 
+                if (!card) return false;
+
+                card.classList.toggle('d-none')
+            }
 
             // Mengambil angka saja dari string Rp (Contoh: "Rp 150.000" -> 150000)
             const parseAngka = (stringRupiah) => {
@@ -897,14 +915,22 @@
                 }
             });
 
+            function cutText(texts) {
+                const res = texts.match(/.{1,15}/g)
+                    .map(text => `<p style="margin-bottom:-5px;" >${text}</p>`)
+                    .join('');
+                return res;
+            }
+
             function pilihData(name_product, id_product, harga_satuan, harga_beli, satuanKecil, satuanBesar, satuanKecilName,
                 satuanBesarName) {
                 let checkProduct = $('#keranjang').find('.input_product_id_' + id_product).length;
-                let getBaris = $('#keranjang').find('.baris_keranjang:last');
+                let getBaris = $('#keranjang').find('.baris_keranjang').last();
                 let baris = 1;
                 if (getBaris.length > 0) {
                     baris = parseInt(getBaris.val()) + 1;
                 }
+                console.log([getBaris, getBaris.val(),baris])
 
                 let checkSatuan = $('#keranjang').find('#satuanKecil_' + id_product + ':checked');
                 if (checkProduct > 0 && checkSatuan.length > 0) {
@@ -928,9 +954,15 @@
                         `
                  <tr>
                     <input type="hidden" name="baris[]" class="baris_keranjang" value="${baris}">
-                    <td> <input type="hidden" value="${id_product}" name="product_id[]" class="input_product_id_${id_product}">
-                        ${name_product}</td>
-                    <td class="text-center">
+                    <td style="white-space:nowrap;"> <input type="hidden" value="${id_product}" name="product_id[]" class="input_product_id_${id_product}">
+                        ${cutText(name_product)}
+                        <p>
+                             <input type="hidden" name="harga_satuan[]" value="${harga_satuan}"
+                            class="input_harga_satuan_${id_product}">
+                        <span  class="harga_satuan_${id_product} rupiah fw-bold">${$.number(harga_satuan,0)}</span>
+                            </p>
+                        </td>
+                    <td class="text-center" style="white-space:nowrap;">
 
                          <div class="form-check form-check-inline">
                             <input class="form-check-input satuan_has_used_${id_product} unit_check_kecil_${baris}" data-harga="${harga_satuan}" id="satuanKecil_${id_product}" onclick="satuanKecil(this,${id_product})" value="${satuanKecil}" type="radio"
@@ -947,20 +979,17 @@
                                 ${satuanBesarName}
                             </label>
                         </div>
-                    </td>
-                    <td class="text-center">
-                        <input type="hidden" name="harga_satuan[]" value="${harga_satuan}"
-                            class="input_harga_satuan_${id_product}">
-                        <span  class="harga_satuan_${id_product} rupiah">${$.number(harga_satuan,0)}</span>
-                    </td>
-                    <td class="text-center">
-                        <span style="font-size:20px;cursor:pointer;margin-right:10px;"
+                        <p>
+                             <span style="font-size:20px;cursor:pointer;margin-right:10px;"
                         onclick="minusCurrent(this,${id_product})"><i class="bx bx-minus-circle"></i></span>
                         <input type="text" oninput="inputJumbar(this, ${id_product})" inputMode="numeric" style="text-align:center;width:30px;border-top:none;border-left:none;border-right:none;" name="qty[]" class="input_jumlah_unit_${id_product}" value="1">
 
                         <span style="font-size:20px;cursor:pointer;margin-left:10px;"
                             onclick="tambahCurrent(this,${id_product})"><i class="bx bx-plus-circle"></i></span>
+                            </p>
                     </td>
+
+
                     <td class="text-center" width="250">
 
                         <input type="hidden" name="harga_total[]" value="${harga_satuan}"
@@ -979,6 +1008,7 @@
 
                 jumlahSubTotal();
                 hitungKembalian();
+                $('#modalCariBarang').modal('hide')
             }
 
             function jumlahSubTotal() {
@@ -1156,7 +1186,7 @@
                             <tr>
                                     <td>${no++}</td>
                                     <td>${v.product.name} </td>
-                                    <td><button class="btn btn-primary" onclick="pilihData('${v.product.name}',${v.product.id},${v.product.selling_price}, ${v.product.price_grosir} , ${v.product.unit_id}, ${v.product.purchase_unit_id}, '${v.product.short}', '${v.product.purchase_name}')">Pilih</button></td>
+                                    <td><button class="btn btn-sm btn-primary" onclick="pilihData('${v.product.name}',${v.product.id},${v.product.selling_price}, ${v.product.price_grosir} , ${v.product.unit_id}, ${v.product.purchase_unit_id}, '${v.product.short}', '${v.product.purchase_name}')">Pilih</button></td>
                                 </tr>
                             `;
                             })

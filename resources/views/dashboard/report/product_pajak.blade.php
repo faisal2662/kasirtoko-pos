@@ -7,7 +7,7 @@
 @section('container')
     @include('sweetalert::alert')
 
-    <h3>Laporan Produk Kena Pajakk</h3>
+    <h3>Laporan Produk Kena Pajak</h3>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
@@ -21,9 +21,24 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Laporan Produk Kena Pajak </h5>
-                        <button class="btn btn-primary" id="print" style="float:right; margin-right:25px;"><i
-                                class="bi bi-printer"></i> Print</button>
                         <form action="" method="get">
+                            <div id="container-print" class="float-end" style="margin-right:20px;">
+                                @if (isset(Request()->awal) && isset(Request()->akhir))
+                                    <a class="btn btn-success" target="_blank"
+                                        href="{{ Request()->getRequestUri() }}&?&export=export-excel"><i
+                                            class="bi bi-file-spreadsheet"></i> Excel</a>
+                                    <a class="btn btn-danger" target="_blank"
+                                        href="{{ Request()->getRequestUri() }}&?&export=export-pdf"><i
+                                            class="bi bi-filetype-pdf"></i> Pdf</a>
+                                @else
+                                    <a class="btn btn-success" target="_blank"
+                                        href="{{ Request()->getRequestUri() }}?&export=export-excel"><i
+                                            class="bi bi-file-spreadsheet"></i> Excel</a>
+                                    <a class="btn btn-danger" target="_blank"
+                                        href="{{ Request()->getRequestUri() }}?&export=export-pdf"><i
+                                            class="bi bi-filetype-pdf"></i> Pdf</a>
+                                @endif
+                            </div>
                             <div class="row mb-3">
 
                                 <div class="col-3">
@@ -78,7 +93,8 @@
                                             {{-- Hanya munculkan No dan Tanggal di baris pertama tiap grup tanggal --}}
                                             @if ($index === 0)
                                                 <td rowspan="{{ $items->count() }}">{{ $no++ }}</td>
-                                                <td style="text-align: center;vertical-align:middle;s" rowspan="{{ $items->count() }}">
+                                                <td style="text-align: center;vertical-align:middle;s"
+                                                    rowspan="{{ $items->count() }}">
                                                     {{ \Carbon\Carbon::parse($tgl)->format('d/m/Y') }}</td>
                                             @endif
 

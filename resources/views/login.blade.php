@@ -28,7 +28,7 @@
 </head>
 
 <body>
-    @include('sweetalert::alert')
+@include('sweetalert::alert')
     <main>
         <div class="container">
 
@@ -40,8 +40,8 @@
 
                             <div class="d-flex justify-content-center py-4">
                                 <a href="" class="logo d-flex align-items-center w-auto">
-                                    <img src="assets/img/logo.png" alt="">
-                                    <span class="d-none d-lg-block">Toko Sembako</span>
+                                    <img src="{{ ('storage/' . $store->logo ) }}" alt="">
+                                    <span class="d-none d-lg-block"> {{ $store->store_name }} </span>
                                 </a>
                             </div><!-- End Logo -->
 
@@ -66,7 +66,7 @@
                                         <div class="col-12">
                                             <label for="yourUsername" class="form-label">Username</label>
                                             <div class="input-group has-validation">
-                                                <input type="text" name="username" class="form-control"
+                                                <input type="text" autofocus name="username" class="form-control"
                                                     id="yourUsername" required>
                                                 <div class="invalid-feedback">Masukkan username</div>
                                             </div>

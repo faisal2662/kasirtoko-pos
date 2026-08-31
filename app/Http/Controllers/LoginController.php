@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\StoreSetting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,11 +20,8 @@ class LoginController extends Controller
     {
         //
 
-        // $user = User::find(1)->role()->first();
-        // dd($user);
-        // return view('login',['user' => $user]);
-        // return(Hash::make('123'));
-        return view('login');
+    $store = StoreSetting::first();
+        return view('login',compact('store'));
 
     }
 

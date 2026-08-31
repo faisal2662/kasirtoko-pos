@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\category;
 use App\Models\Product;
+use App\Models\Supplier;
 use App\Models\Unit;
 use Carbon\Carbon;
-use DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Yajra\DataTables\DataTables;
 
 class ProductController extends Controller
 {
@@ -29,7 +30,7 @@ class ProductController extends Controller
 
     public function datatables()
     {
-        $products = Product::join('categories', 'categories.id', '=', 'products.category_id')->join('units', 'units.id', '=', 'products.unit_id')
+        $products = Product::leftJoin('categories', 'categories.id', '=', 'products.category_id')->join('units', 'units.id', '=', 'products.unit_id')
             ->where('products.is_deleted', 'N')
             ->select('products.*', 'categories.name as categories_name', 'units.short')
             ->orderBy('products.id', 'desc')
@@ -62,7 +63,8 @@ class ProductController extends Controller
         //
         $category = category::where('is_deleted', "N")->get();
         $units = Unit::where('is_deleted', 'N')->get();
-        return view('dashboard.product.create', ['category' => $category, 'units' => $units]);
+        $supplie = Supplier::where('is_deleted', 'N')->get();
+        return view('dashboard.product.create', ['supplier' => $supplie, 'category' => $category, 'units' => $units]);
     }
 
     /**
@@ -76,20 +78,25 @@ class ProductController extends Controller
         //
         // dd($request);
         $request->validate([
-            'name' => 'required|unique:products',
-            'category_id' => 'required',
+            'name' => 'required',
+            // 'category_id' => 'required',
             'unit' => 'required',
             'content_per_unit' => 'required',
-            'purchase_price' => 'required',
+            // 'purchase_price' => 'required',
             'selling_price' => 'required',
             'purchase_unit_id' => 'required',
-            'min_stock' => 'required',
+
             'is_pajak' => 'required'
         ]);
 
 
         try {
             DB::beginTransaction();
+            $cekProduct = Product::where("is_deleted", 'N')->where('name', $request->name)->first();
+            if ($cekProduct) {
+                DB::rollBack();
+                return response()->json(['status' => 'failed', 'message' => 'Nama Produk sudah ada '], 500);
+            }
 
             $lastProduct = Product::where('is_deleted', 'N')
                 ->orderBy('id', 'desc')
@@ -111,14 +118,15 @@ class ProductController extends Controller
 
             // konversi stok ke satuan tercecil
             $stock = $request->stock * $request->content_per_unit;
-            $min_stock =$request->min_stock * $request->content_per_unit;
+            $min_stock = $request->min_stock * $request->content_per_unit;
 
             $kode_product = 'BRNG-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
             $product = new Product;
             $product->code_product = $kode_product;
             $product->category_id = $request->category_id;
+            $product->supplier_id = $request->supplier_id;
             $product->name = $request->name;
-            $product->purchase_price = str_replace(',', '', $request->purchase_price);
+            $product->purchase_price = str_replace(',', '', $request->purchase_price ?? 0);
             $product->selling_price = str_replace(',', '', $request->selling_price);
             $product->price_grosir = str_replace(',', '', $request->price_grosir);
             $product->content_per_unit = $request->content_per_unit;
@@ -135,7 +143,7 @@ class ProductController extends Controller
             return redirect()->route('product.add')->with('success', 'Simpan Berhasil');
         } catch (\Throwable $th) {
             DB::rollback();
-            return response()->json(['status' => 'failed', 'message' => 'Simpan Produk Gagal'], 500);
+            return response()->json(['status' => 'failed', 'message' => 'Simpan Produk Gagal', $th->getMessage()], 500);
             throw $th;
             return redirect()->route('product.add')->with('success', 'Simpan Berhasil');
         }
@@ -151,7 +159,7 @@ class ProductController extends Controller
     {
         //
         try {
-            $product = Product::join('categories', 'categories.id', 'products.category_id')
+            $product = Product::leftJoin('categories', 'categories.id', 'products.category_id')
                 ->leftJoin('units', 'units.id', 'products.unit_id')
                 ->leftJoin('units as purchase_unit', 'products.purchase_unit_id', 'purchase_unit.id')
                 ->select('products.*', 'categories.name as category_name', 'purchase_unit.name as purchase_unit_name', 'units.name as unit_name')->where('products.id', $id)->first();
@@ -175,10 +183,12 @@ class ProductController extends Controller
         $units = Unit::where('is_deleted', 'N')->get();
         $categories = Category::where('is_deleted', "N")->get();
         // $products = Product::where('slug', $id)->get();
+        $supplier = Supplier::where('is_deleted', 'N')->get();
+
         $products = Product::where('products.id', $id)
             ->first();
 
-        return view('dashboard.product.edit', ['product' => $products, 'categories' => $categories, 'units' => $units]);
+        return view('dashboard.product.edit', ['supplier' => $supplier,  'product' => $products, 'categories' => $categories, 'units' => $units]);
     }
 
     /**
@@ -194,14 +204,14 @@ class ProductController extends Controller
         // dd($request);
 
         $request->validate([
-            'name' => 'required|exists:products',
-            'category_id' => 'required',
+            'name' => 'required',
+            // 'category_id' => 'required',
             'unit' => 'required',
             'content_per_unit' => 'required',
-            'purchase_price' => 'required',
+            // 'purchase_price' => 'required',
             'selling_price' => 'required',
             'purchase_unit_id' => 'required',
-            'min_stock' => 'required',
+            // 'min_stock' => 'required',
             'is_pajak' => 'required'
         ]);
 
@@ -264,7 +274,7 @@ class ProductController extends Controller
     {
         try {
             $product = Product::where('id', $request->product_id)->first();
-            $product->stock = $request->stock;
+            $product->stock = $product->stock + $request->stock;
             $product->update();
             return response()->json(['status' => 'success', 'desc' => 'Penyesuaian stock Berhasil'], 200);
         } catch (\Throwable $th) {

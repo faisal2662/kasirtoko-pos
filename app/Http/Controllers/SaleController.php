@@ -17,9 +17,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-// use Intervention\Image\Image;
 use Intervention\Image\ImageManager;
 use Mike42\Escpos\EscposImage;
+use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 use Mike42\Escpos\Printer;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -38,8 +38,15 @@ class SaleController extends Controller
 
         $setup = StoreSetting::where('is_deleted', 'N')->first();
         // Alert::toast('D', 'Data Tersimpan');
-        return view('dashboard/sale/index', compact('setup'));
+        if (isset(Request()->mobile) && Request()->mobile == 'true') {
+
+            return view('dashboard.sale.index-mobile', compact('setup'));
+        } else {
+
+            return view('dashboard.sale.index', compact('setup'));
+        }
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -64,12 +71,6 @@ class SaleController extends Controller
             DB::beginTransaction();
             $code_sale =  $this->generateInvoiceCode();
             //code...
-
-
-            if ($request->cetak) {
-                dd('berhasil');
-            }
-            // dd('seu');
 
             $code = $code_sale;
 
@@ -120,12 +121,12 @@ class SaleController extends Controller
                     DB::rollBack();
                     return response()->json(['status' => 'failed', 'message' => 'Terjadi Kesalahan : product tidak ditemukan'], 500);
                 }
-                if(!$unit){
+                if (!$unit) {
                     DB::rollback();
-                    return response()->json(['status' => 'failed', 'message' => 'Terjadi Kesalahan : unit tidak ditemukan'],500);
+                    return response()->json(['status' => 'failed', 'message' => 'Terjadi Kesalahan : unit tidak ditemukan'], 500);
                 }
                 $qty = $request->qty[$i];
-                if ( isset($unit) && $unit->type == 'MULTIPLE') {
+                if (isset($unit) && $unit->type == 'MULTIPLE') {
                     $qty = $request->qty[$i] * $product->content_per_unit;
                 }
 
@@ -189,10 +190,11 @@ class SaleController extends Controller
             }
             $getSale->name_customer = $name_customer;
             // $this->printReceipt($sale->id, str_replace(',', '', $request->sub_total), str_replace(',', '', $request->bayar_customer), str_replace(',', '', $request->kembalian));
-
+            $decodeLogo = $this->decodeImageForQZ($setup->logo);
+            $decodeqris = $this->decodeImageForQZ($setup->qris_image);
             DB::commit();
 
-            return response()->json(['status' => 'success', 'desc' => 'Data Tersimpan',  'sale' => $getSale, 'setup' => $setup], 200);
+            return response()->json(['status' => 'success', 'desc' => 'Data Tersimpan',  'sale' => $getSale, 'setup' => $setup, 'qris' => $decodeqris, 'logo' => $decodeLogo], 200);
             Alert::toast('Data Tersimpan', 'success');
             return redirect()->back();
         } catch (\Throwable $th) {
@@ -203,21 +205,60 @@ class SaleController extends Controller
         }
     }
 
+    public function decodeImageForQZ($imagePath)
+    {
+        try {
+            // 1. Gunakan DummyConnector agar data tidak dikirim ke printer fisik
+            $connector = new DummyPrintConnector();
+            $printer = new Printer($connector);
+
+            // 2. Load Gambar (Pastikan path benar)
+            // Gunakan bitImage() untuk hasil paling tajam (dot-by-dot)
+            if (file_exists(public_path('storage/' . $imagePath))) {
+                $img = EscposImage::load(public_path('storage/' . $imagePath));
+
+                $printer->setJustification(Printer::JUSTIFY_CENTER);
+                $printer->bitImage($img); // Ini inti dari decoding gambar
+                $printer->feed(1);
+            }
+
+            // 3. Ambil data biner yang sudah didecode
+            $rawData = $connector->getData();
+            $printer->close();
+
+            // 4. Encode ke Base64 agar aman dikirim via JSON
+            return base64_encode($rawData);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
     public function printStrukv2($id)
     {
-        $sale = Sale::with('saleDetail.product')
-            ->join('users', 'users.id', 'sales.created_by')
-            ->select('sales.*', 'users.name as kasir_name')
-            ->find($id);
-        $name_customer = $sale->name;
-        if ($sale->name == '' || $sale->name == null) {
-            $name_customer = Customer::where('id', $sale->customer_id)->first()->name ?? '';
-            // }
-            // $this->printReceipt($sale->id, str_replace(',', '', $request->sub_total), str_replace(',', '', $request->bayar_customer), str_replace(',', '', $request->kembalian));
-        }
-        $sale->name_customer = $name_customer;
 
-        $setup = StoreSetting::first();
+        try {
+
+            $sale = Sale::with('saleDetail.product')
+                ->join('users', 'users.id', 'sales.created_by')
+                ->select('sales.*', 'users.name as kasir_name')
+                ->find($id);
+            $name_customer = $sale->name;
+            if ($sale->name == '' || $sale->name == null) {
+                $name_customer = Customer::where('id', $sale->customer_id)->first()->name ?? '';
+                // }
+                // $this->printReceipt($sale->id, str_replace(',', '', $request->sub_total), str_replace(',', '', $request->bayar_customer), str_replace(',', '', $request->kembalian));
+            }
+            $sale->name_customer = $name_customer;
+            $setup = StoreSetting::first();
+            $sale->decodeLogo = $this->decodeImageForQZ($setup->logo);
+            $sale->decodeqris = $this->decodeImageForQZ($setup->qris_image);
+            //code...
+
+            return response()->json(['status' => 'success', 'data' => $setup, 'sale' => $sale], 201);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json(['status' => 'failed', 'message' => 'Terjadi Kesalahan'], 500);
+        }
         return view('dashboard.sale.print_struk', compact('setup', 'sale'));
     }
 
@@ -287,51 +328,6 @@ class SaleController extends Controller
         return $prefix . $number;
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
-
     public function search(Request $request)
     {
         $data = '';
@@ -366,12 +362,7 @@ class SaleController extends Controller
         return response()->json($data, 200);
     }
 
-    public function print(Request $request)
-    {
-        // dd($request);
-        // Log::info(json_encode($request->all()));
-        // "berhasil";
-    }
+
 
     public function getDataPopuler()
     {

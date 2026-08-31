@@ -45,13 +45,13 @@
                                 <input type="text" name="name" id="nama" required value="{{ $product->name }}"
                                     class="form-control" autofocus>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3" style="display: none;" >
                                 <label for="category" class="form-label">Kategori <span class="text-danger">*</span></label>
-                                <select name="category_id" id="category" class="form-control" required>
+                                <select name="category_id" id="category" class="form-control" >
                                     <option disabled>-- Pilih Kategori -- </option>
-                                    @foreach ($categories as $item)
+                                    {{-- @foreach ($categories as $item)
                                         <option value="{{ $item->id }}" {{ $product->category_id == $item->id ? 'selected' : '' }} >{{ $item->name }}</option>
-                                    @endforeach
+                                    @endforeach --}}
                                 </select>
                             </div>
 
@@ -83,10 +83,10 @@
                                 <input type="number" class="form-control" value="{{ $product->content_per_unit }}" required name="content_per_unit">
                             </div>
 
-                            <div class="mb-3">
-                                <label for="price" class="form-label">Harga Beli <span class="text-danger">*</span>
+                            <div class="mb-3" style="">
+                                <label for="price" class="form-label">Harga Beli
                                 </label>
-                                <input type="text" inputmode="numeric" required name="purchase_price" value="{{ $product->purchase_price }}" id="purchase_price"
+                                <input type="text" inputmode="numeric"  name="purchase_price" value="{{ $product->purchase_price }}" id="purchase_price"
                                     class="form-control rupiah">
                             </div>
                             <div class="mb-3">
@@ -101,13 +101,13 @@
                                 <input type="text" name="price_grosir" value="{{ $product->price_grosir }}" inputMode="numeric" id="price_grosir" required
                                     class="form-control rupiah">
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3" style="display: none;" >
                                 <label for="stock" class="form-label">Stok <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" readonly required name="stock" value="{{ $product->stock }}" id="stock">
+                                <input type="number" class="form-control" readonly  name="stock" value="{{ $product->stock }}" id="stock">
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3" style="display: none;">
                                 <label for="stock" class="form-label">Min Stok <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control"  required name="min_stock" id="stock" value="{{ $product->min_stock }}" >
+                                <input type="number" class="form-control"   name="min_stock" id="stock" value="{{ $product->min_stock }}" >
                             </div>
                             <label for="" class="form-label">Masuk Pajak?</label>
                             <div class="mb-3">

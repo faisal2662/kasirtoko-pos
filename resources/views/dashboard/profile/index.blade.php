@@ -46,8 +46,8 @@
     <header id="header" class="header fixed-top d-flex align-items-center">
 
         <div class="d-flex align-items-center justify-content-between">
-            <a href="/dashboard" class="logo d-flex align-items-center">
-                <span class="d-none d-lg-block">Toko Jaya Makmur</span>
+            <a href="{{ route('dashboard') }}" class="logo d-flex align-items-center">
+                <span class="d-none d-lg-block"> {{ $store->store_name }} </span>
             </a>
         </div><!-- End Logo -->
 
@@ -75,7 +75,7 @@
                             <hr class="dropdown-divider">
                         </li>
                         <li>
-                            <a class="dropdown-item d-flex align-items-center" href="/logout">
+                            <a class="dropdown-item d-flex align-items-center" href="{{ route('logout') }}">
                                 <i class="bi bi-box-arrow-right"></i>
                                 <span>Sign Out</span>
                             </a>
@@ -92,43 +92,42 @@
     <!-- ======= Sidebar ======= -->
     @include('sweetalert::alert')
     <div class="container " style="margin-top:90px;width:40rem;">
-        <section>
+        <section class="section profile">
             <div class="card">
-                <div class="card-body">
+                <div class="card-body ">
                     <div class="card-title">DATA PROFILE</div>
                     <div class="text-center">
                         <img src="{{ asset('img/person.svg') }}" width="150px" alt="...">
                     </div>
-                    <div class="row bg-info mx-3 mt-2 bg-opacity-10 border border-info border-start-0 rounded-end">
-                        <div class="col-3 pt-3 mb-3">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item">Nama</li>
-                                <li class="list-group-item">Username</li>
-                                <li class="list-group-item">Alamat</li>
-                                <li class="list-group-item pb-4 pt-3">Password</li>
-                            </ul>
-                        </div>
-                        <div class="col-6 pt-3">
-                            @foreach ($users as $item)
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item">{{ $item->name }} </li>
-                                    <li class="list-group-item">{{ $item->username }}</li>
-                                    <li class="list-group-item">{{ $item->address }}</li>
-                                    <li class="list-group-item"><button style="float: left; margin-right:10px;"
-                                            class="btn btn-info" data-bs-toggle="modal"
-                                            data-bs-target="#ubahPassword"><i class="bi bi-arrow-repeat"></i>
-                                        </button>
-                                        <p class="text-muted pt-2 ">Ubah Password</p>
+                    <div
+                        class="row bg-info profile-overview mx-3 mt-2 bg-opacity-10 border border-info border-start-0 rounded-end">
 
-                                    </li>
-                                </ul>
-                            @endforeach
+                        <div class="ms-5 mt-3">
+
+                            <div class="row">
+                                <div class="col-lg-4 label">Nama</div>
+                                <div class="col-lg-8"> {{ $users->name }} </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4 label">Username</div>
+                                <div class="col-lg-8"> {{ $users->username }} </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4 label">Alamat</div>
+                                <div class="col-lg-8"> {{ $users->address }} </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4 label">Ubah Password</div>
+                                <div class="col-lg-8"> <button class="btn btn-info" data-bs-target="#ubahPassword"
+                                        data-bs-toggle="modal"><i class="bi bi-arrow-repeat"></i></button> </div>
+                            </div>
                         </div>
                     </div>
                     <button data-bs-toggle="modal" data-bs-target="#ubahData" class="btn btn-success "
                         style="margin-left:30px; margin-top: 18px">Ubah
                         Data</button>
-                    <a href="{{ route('dashboard') }}" class="btn btn-secondary mt-3 " style="float: right;">Kembali</a>
+                    <a href="{{ route('dashboard') }}" class="btn btn-secondary mt-3 "
+                        style="float: right;">Kembali</a>
                 </div>
             </div>
         </section>
@@ -191,26 +190,25 @@
                 </div>
                 <div class="modal-body">
 
-                    @foreach ($users as $item)
-                        <form action="/dashboard/users-profile/update/{{ $item->username }}" method="post">
-                            @csrf
-                            <label for="name" class="form-label">Masukkan Nama</label>
-                            <div class="input-group">
-                                <input type="text" name="name" id="name" class="form-control"
-                                    value="{{ $item->name }}">
-                            </div>
-                            <label for="username" class="form-label ">Username</label>
-                            <div class="mb-3 input-group">
-                                <input type="text" id="username" name="username"
-                                    class="form-control input-group" value="{{ $item->username }}">
-                            </div>
-                            <label for="alamat" class="form-label">Alamat</label>
-                            <div class="mb-3 input-group">
-                                <textarea name="address" id="address" class="form-control" cols="30" rows="3">{{ $item->address }}</textarea>
-                            </div>
-                            <button type="submit" class="btn btn-success">Simpan</button>
-                        </form>
-                    @endforeach
+                    <form action="{{ route('user.update', $users->id) }}}}" method="post">
+                        @csrf
+                        <label for="name" class="form-label">Masukkan Nama</label>
+                        <div class="input-group">
+                            <input type="text" name="name" id="name" class="form-control"
+                                value="{{ $users->name }}">
+                        </div>
+                        <label for="username" class="form-label ">Username</label>
+                        <div class="mb-3 input-group">
+                            <input type="text" id="username" name="username" class="form-control input-group"
+                                value="{{ $users->username }}">
+                        </div>
+                        <label for="alamat" class="form-label">Alamat</label>
+                        <div class="mb-3 input-group">
+                            <textarea name="address" id="address" class="form-control" cols="30" rows="3">{{ $users->address }}</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">Simpan</button>
+                    </form>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>

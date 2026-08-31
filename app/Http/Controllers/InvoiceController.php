@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Mike42\Escpos\EscposImage;
+use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 use Mike42\Escpos\Printer;
 use Yajra\DataTables\DataTables;
@@ -234,7 +235,7 @@ class InvoiceController extends Controller
             //     $printer->cut();
 
             // }
-            return response()->json([$e->getMessage(), $e->getLine()],500);
+            return response()->json([$e->getMessage(), $e->getLine()], 500);
         }
         // finally {
         //     // Pastikan printer ditutup apa pun yang terjadi
@@ -245,5 +246,62 @@ class InvoiceController extends Controller
         //         $printer->close();
         //     }
         // }
+    }
+
+    public function printStrukv2(Request $request)
+    {
+
+        try {
+
+            $sale = Sale::with('saleDetail.product')
+                ->join('users', 'users.id', 'sales.created_by')
+                ->select('sales.*', 'users.name as kasir_name')
+                ->find($request->id_sale);
+            $name_customer = $sale->name;
+            if ($sale->name == '' || $sale->name == null) {
+                $name_customer = Customer::where('id', $sale->customer_id)->first()->name ?? '';
+                // }
+                // $this->printReceipt($sale->id, str_replace(',', '', $request->sub_total), str_replace(',', '', $request->bayar_customer), str_replace(',', '', $request->kembalian));
+            }
+            $sale->name_customer = $name_customer;
+            $setup = StoreSetting::first();
+            $sale->decodeLogo = $this->decodeImageForQZ($setup->logo);
+            $sale->decodeqris = $this->decodeImageForQZ($setup->qris_image);
+            //code...
+
+            return response()->json(['status' => 'success', 'data' => $setup, 'sale' => $sale], 201);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json(['status' => 'failed', 'message' => 'Terjadi Kesalahan'], 500);
+        }
+        return view('dashboard.sale.print_struk', compact('setup', 'sale'));
+    }
+
+    public function decodeImageForQZ($imagePath)
+    {
+        try {
+            // 1. Gunakan DummyConnector agar data tidak dikirim ke printer fisik
+            $connector = new DummyPrintConnector();
+            $printer = new Printer($connector);
+
+            // 2. Load Gambar (Pastikan path benar)
+            // Gunakan bitImage() untuk hasil paling tajam (dot-by-dot)
+            if (file_exists(public_path('storage/' . $imagePath))) {
+                $img = EscposImage::load(public_path('storage/' . $imagePath));
+
+                $printer->setJustification(Printer::JUSTIFY_CENTER);
+                $printer->bitImage($img); // Ini inti dari decoding gambar
+                $printer->feed(1);
+            }
+
+            // 3. Ambil data biner yang sudah didecode
+            $rawData = $connector->getData();
+            $printer->close();
+
+            // 4. Encode ke Base64 agar aman dikirim via JSON
+            return base64_encode($rawData);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }

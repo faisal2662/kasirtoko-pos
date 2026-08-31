@@ -21,9 +21,24 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Laporan Kas </h5>
-                        <button class="btn btn-primary" id="print" style="float:right; margin-right:25px;"><i
-                                class="bi bi-printer"></i> Print</button>
-                     <form action="" method="get">
+                        <form action="" method="get">
+                            <div id="container-print" class="float-end" style="margin-right:20px;">
+                                @if (isset(Request()->awal) && isset(Request()->akhir))
+                                    <a class="btn btn-success" target="_blank"
+                                        href="{{ Request()->getRequestUri() }}&?&export=export-excel"><i
+                                            class="bi bi-file-spreadsheet"></i> Excel</a>
+                                    <a class="btn btn-danger" target="_blank"
+                                        href="{{ Request()->getRequestUri() }}&?&export=export-pdf"><i
+                                            class="bi bi-filetype-pdf"></i> Pdf</a>
+                                @else
+                                    <a class="btn btn-success" target="_blank"
+                                        href="{{ Request()->getRequestUri() }}?&export=export-excel"><i
+                                            class="bi bi-file-spreadsheet"></i> Excel</a>
+                                    <a class="btn btn-danger" target="_blank"
+                                        href="{{ Request()->getRequestUri() }}?&export=export-pdf"><i
+                                            class="bi bi-filetype-pdf"></i> Pdf</a>
+                                @endif
+                            </div>
                             <div class="row mb-3">
 
                                 <div class="col-3">
@@ -67,14 +82,14 @@
                                     $grandTotal = 0;
                                     $grandCash = 0;
                                     $grandTransfer = 0;
-                                    @endphp
-                                @foreach ($payment as $item)
-                                @php
-                                $grandTotal += $item->total;
-                                $grandCash += $item->cash;
-                                $grandTransfer += $item->transfer;
-
                                 @endphp
+                                @foreach ($payment as $item)
+                                    @php
+                                        $grandTotal += $item->total;
+                                        $grandCash += $item->cash;
+                                        $grandTransfer += $item->transfer;
+
+                                    @endphp
                                     <tr>
                                         <th scope="row">{{ $loop->iteration }}</th>
                                         <td>{{ $item->date_payment }}</td>
@@ -89,9 +104,9 @@
                                 </tr>
                                 <tr>
                                     <td colspan="2"> Total </td>
-                                    <td > @currency($grandCash) </td>
-                                    <td > @currency($grandTransfer) </td>
-                                    <td > @currency($grandTotal) </td>
+                                    <td> @currency($grandCash) </td>
+                                    <td> @currency($grandTransfer) </td>
+                                    <td> @currency($grandTotal) </td>
                                 </tr>
 
                             </tbody>

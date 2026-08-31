@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Unit;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class UnitController extends Controller
@@ -16,7 +18,7 @@ class UnitController extends Controller
     public function index()
     {
         //
-        $units = Unit::all();
+        $units = Unit::where('is_deleted', 'N')->get();
         return view('dashboard/unit/index', ['units' => $units]);
     }
 
@@ -40,12 +42,15 @@ class UnitController extends Controller
     {
         //
         $validated = $request->validate([
-            'name' => ['required',
-               Rule::unique('units')->where(function ($query)  {
+            'name' => [
+                'required',
+                Rule::unique('units')->where(function ($query) {
                     return $query->where('is_deleted', 'N');
                 })
             ],
-            'short' => 'required|unique:units'
+            'short' => ['required',  Rule::unique('units')->where(function ($query) {
+                return $query->where('is_deleted', 'N');
+            })]
         ]);
 
         Unit::create($request->all());
@@ -85,16 +90,16 @@ class UnitController extends Controller
     {
         //
         // dd($request);s
-        $validated= $request->validate([
+        $validated = $request->validate([
             'name' => 'required',
             'short' => 'required'
         ]);
 
-        $unit = Unit::where('slug', $id)->first();
+        $unit = Unit::where('id', $id)->first();
         $unit->slug = null;
         $unit->update($request->all());
 
-        return redirect('/dashboard/unit')->with('success', 'Ubah Berhasil');
+        return redirect()->back()->with('success', 'Ubah Berhasil');
     }
 
     /**
@@ -106,8 +111,14 @@ class UnitController extends Controller
     public function destroy($id)
     {
         //
-        Unit::where('slug', $id)->first()->delete();
 
-        return redirect('/dashboard/unit')->with('success', 'Hapus Berhasil');
+        $unit = Unit::where('id', $id)->first();
+        $unit->is_deleted = 'Y';
+        $unit->deleted_date = Carbon::now();
+        $unit->deleted_by = Auth::user()->id;
+        $unit->update();
+        // ->delete();
+
+        return back()->with('success', 'Hapus Berhasil');
     }
 }

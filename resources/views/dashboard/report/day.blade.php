@@ -1,5 +1,8 @@
 @extends('dashboard.layouts.main')
 
+@section('title')
+    Laporan Harian | Kasir
+@endsection
 @section('container')
     @include('sweetalert::alert')
 
@@ -16,15 +19,24 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Data Keuangan Harian </h5>
-                        <form action="" method="get">
-                        <div id="container-print" class="float-end" style="margin-right:20px;">
-                            <a class="btn btn-success"  target="_blank"
-                                                href="{{ Request()->getRequestUri() }}&export=export-excel" ><i
-                                class="bi bi-file-spreadsheet"></i> Excel</a>
-                            <a class="btn btn-danger"  target="_blank"
-                                                href="{{ Request()->getRequestUri() }}&export=export-pdf" ><i
-                                class="bi bi-filetype-pdf"></i> Pdf</a>
+                        <h5 class="card-title">Data Keuangan Detail </h5>
+                     <form action="" method="get">
+                            <div id="container-print" class="float-end" style="margin-right:20px;">
+                                @if (isset(Request()->awal) && isset(Request()->akhir))
+                                    <a class="btn btn-success" target="_blank"
+                                        href="{{ Request()->getRequestUri() }}&?&export=export-excel"><i
+                                            class="bi bi-file-spreadsheet"></i> Excel</a>
+                                    <a class="btn btn-danger" target="_blank"
+                                        href="{{ Request()->getRequestUri() }}&?&export=export-pdf"><i
+                                            class="bi bi-filetype-pdf"></i> Pdf</a>
+                                @else
+                                    <a class="btn btn-success" target="_blank"
+                                        href="{{ Request()->getRequestUri() }}?&export=export-excel"><i
+                                            class="bi bi-file-spreadsheet"></i> Excel</a>
+                                    <a class="btn btn-danger" target="_blank"
+                                        href="{{ Request()->getRequestUri() }}?&export=export-pdf"><i
+                                            class="bi bi-filetype-pdf"></i> Pdf</a>
+                                @endif
                             </div>
                             <div class="row mb-3">
 

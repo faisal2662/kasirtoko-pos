@@ -6,9 +6,16 @@ use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleDetail;
+use App\Models\StoreSetting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Reader\Html as HtmlReader;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class ReportController extends Controller
@@ -32,13 +39,38 @@ class ReportController extends Controller
 
     public function print(Request $request)
     {
-        dd($request->all());
+        // dd($request->all());
     }
 
     public function reportDay(Request $request)
     {
-        if (isset($request->filter) && $request->filter == 'true') {
 
+        // if (isset($request->filter) && $request->filter == 'true') {
+
+        //     $sale = Sale::where('is_deleted', 'N')
+        //         ->select(
+        //             'date',
+        //             DB::raw('SUM(total) as total_harian'),
+        //             DB::raw('GROUP_CONCAT(id) as all_ids') // Menggabungkan semua ID
+        //         )
+        //         ->whereBetween('date', [$request->awal, $request->akhir])
+        //         ->groupBy('date')
+        //         ->orderBy('date', 'desc')
+        //         ->get();
+        //     $grandTotal = 0;
+        //     foreach ($sale as $val) {
+        //         # code...
+        //         $grandTotal  +=  $val->total_harian;
+        //         $val->grandTotal = $grandTotal;
+        //         $id = explode(',', $val->all_ids);
+        //         $val->jumlahTransaksi = count($id);
+        //         $val->jumlahQty = saleDetail::where('sale_id', $val->all_ids)->sum('quantity');
+        //     }
+        //     return view('dashboard.report.day', compact('sale', 'grandTotal'));
+        // }
+        $sekarang = Carbon::now()->toDateString();
+        $prev = Carbon::now()->subDay(7)->toDateString();
+        if (isset($request->fillter) && $request->filter == 'true') {
             $sale = Sale::where('is_deleted', 'N')
                 ->select(
                     'date',
@@ -49,30 +81,19 @@ class ReportController extends Controller
                 ->groupBy('date')
                 ->orderBy('date', 'desc')
                 ->get();
-            $grandTotal = 0;
-            foreach ($sale as $val) {
-                # code...
-                $grandTotal  +=  $val->total_harian;
-                $val->grandTotal = $grandTotal;
-                $id = explode(',', $val->all_ids);
-                $val->jumlahTransaksi = count($id);
-                $val->jumlahQty = saleDetail::where('sale_id', $val->all_ids)->sum('quantity');
-            }
-            return view('dashboard.report.day', compact('sale', 'grandTotal'));
-        }
-        $sekarang = Carbon::now()->toDateString();
-        $prev = Carbon::now()->subDay(7)->toDateString();
+        } else {
 
-        $sale = Sale::where('is_deleted', 'N')
-            ->select(
-                'date',
-                DB::raw('SUM(total) as total_harian'),
-                DB::raw('GROUP_CONCAT(id) as all_ids') // Menggabungkan semua ID
-            )
-            ->whereBetween('date', [$prev, $sekarang])
-            ->groupBy('date')
-            ->orderBy('date', 'desc')
-            ->get();
+            $sale = Sale::where('is_deleted', 'N')
+                ->select(
+                    'date',
+                    DB::raw('SUM(total) as total_harian'),
+                    DB::raw('GROUP_CONCAT(id) as all_ids') // Menggabungkan semua ID
+                )
+                ->whereBetween('date', [$prev, $sekarang])
+                ->groupBy('date')
+                ->orderBy('date', 'desc')
+                ->get();
+        }
 
         $grandTotal = 0;
         $grandTransaksi = 0;
@@ -88,20 +109,58 @@ class ReportController extends Controller
 
             $qty = saleDetail::whereIn('sale_id', [$val->all_ids])->get();
 
-            return [$qty, $val];
             $val->jumlahQty = saleDetail::whereIn('sale_id', [$val->all_ids])->sum('quantity');
 
             $grandTransaksi +=  $val->jumlahTransaksi;
             $grandQty += $val->jumlahQty;
         }
-        return $sale;
-        return view('dashboard.report.day', compact('sale', 'grandTotal', 'grandTransaksi', 'grandQty'));
+
+
+        if (isset($request->export) && $request->export == 'export-pdf') {
+            $store = StoreSetting::first();
+            return view('dashboard.report.day-pdf', compact('store', 'sale', 'grandTotal', 'grandTransaksi', 'grandQty'));
+        } else if (isset($request->export) && $request->export == 'export-excel') {
+            $store = StoreSetting::first();
+            $view = View::make('dashboard.report.day-pdf',  compact('store', 'sale', 'grandTotal', 'grandTransaksi', 'grandQty'))->render();
+            // Load HTML ke PhpSpreadsheet
+
+            $reader = new HtmlReader();
+            libxml_use_internal_errors(true);
+            $spreadsheet = $reader->loadFromString($view);
+
+            // Export jadi .xlsx
+            $writer = new Xlsx($spreadsheet);
+
+            return response()->streamDownload(function () use ($writer) {
+                $writer->save('php://output');
+            }, 'Laporan harian.xlsx', [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]);
+        } else {
+
+            return view('dashboard.report.day', compact('sale', 'grandTotal', 'grandTransaksi', 'grandQty'));
+        }
     }
 
     public function reportDetail(Request $request)
     {
-        if (isset($request->filter) && $request->filter == 'true') {
+        // if (isset($request->filter) && $request->filter == 'true') {
 
+        //     $sale = Sale::with('payment')
+        //         ->join('users as kasir', 'kasir.id', 'sales.created_by')
+        //         ->select('sales.*', 'kasir.name as kasir_name')
+        //         ->where("sales.is_deleted", 'N')
+        //         ->whereBetween('date', [$request->awal, $request->akhir])
+        //         ->orderBy('id', 'desc')
+        //         ->get();
+        //     foreach ($sale as $val) {
+        //         # code...
+        //         $val->tanggal = Carbon::parse($val->created_at)->translatedFormat('d F Y H:i');
+        //     }
+        //     return view('dashboard.report.detail', compact('sale'));
+        // }
+
+        if (isset($request->filter) && $request->filter == 'true') {
             $sale = Sale::with('payment')
                 ->join('users as kasir', 'kasir.id', 'sales.created_by')
                 ->select('sales.*', 'kasir.name as kasir_name')
@@ -109,25 +168,45 @@ class ReportController extends Controller
                 ->whereBetween('date', [$request->awal, $request->akhir])
                 ->orderBy('id', 'desc')
                 ->get();
-            foreach ($sale as $val) {
-                # code...
-                $val->tanggal = Carbon::parse($val->created_at)->translatedFormat('d F Y H:i');
-            }
-            return view('dashboard.report.detail', compact('sale'));
+        } else {
+
+            $now = Carbon::now()->toDateString();
+            $sale = Sale::with('payment')
+                ->join('users as kasir', 'kasir.id', 'sales.created_by')
+                ->select('sales.*', 'kasir.name as kasir_name')
+                ->where("sales.is_deleted", 'N')
+                ->where('date', $now)
+                ->orderBy('id', 'desc')
+                ->get();
         }
-        $now = Carbon::now()->toDateString();
-        $sale = Sale::with('payment')
-            ->join('users as kasir', 'kasir.id', 'sales.created_by')
-            ->select('sales.*', 'kasir.name as kasir_name')
-            ->where("sales.is_deleted", 'N')
-            ->where('date', $now)
-            ->orderBy('id', 'desc')
-            ->get();
         foreach ($sale as $val) {
             # code...
             $val->tanggal = Carbon::parse($val->created_at)->translatedFormat('d F Y H:i');
         }
-        return view('dashboard.report.detail', compact('sale'));
+        if (isset($request->export) && $request->export == 'export-pdf') {
+            $store = StoreSetting::first();
+            return view('dashboard.report.detail-cetak', compact('sale', 'store'));
+        } else if (isset($request->export) && $request->export == 'export-excel') {
+            $store = StoreSetting::first();
+            $view = View::make('dashboard.report.detail-cetak', compact('sale', 'store'))->render();
+            // Load HTML ke PhpSpreadsheet
+
+            $reader = new HtmlReader();
+            libxml_use_internal_errors(true);
+            $spreadsheet = $reader->loadFromString($view);
+
+            // Export jadi .xlsx
+            $writer = new Xlsx($spreadsheet);
+
+            return response()->streamDownload(function () use ($writer) {
+                $writer->save('php://output');
+            }, 'Laporan harian Detail.xlsx', [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]);
+        } else {
+
+            return view('dashboard.report.detail', compact('sale'));
+        }
     }
 
     public function reportSellingProduct(Request $request)
@@ -150,6 +229,30 @@ class ReportController extends Controller
                 ->groupBy('product_id')
                 ->where('created_at', $now)
                 ->get();
+        }
+        if (isset($request->export) && $request->export == 'export-pdf') {
+            $store = StoreSetting::first();
+            return view('dashboard.report.selling_product-cetak', compact('sale', 'store'));
+        } else if (isset($request->export) && $request->export == 'export-excel') {
+            $store = StoreSetting::first();
+            $view = View::make('dashboard.report.selling_product-cetak', compact('sale', 'store'))->render();
+            // Load HTML ke PhpSpreadsheet
+
+            $reader = new HtmlReader();
+            libxml_use_internal_errors(true);
+            $spreadsheet = $reader->loadFromString($view);
+
+            // Export jadi .xlsx
+            $writer = new Xlsx($spreadsheet);
+
+            return response()->streamDownload(function () use ($writer) {
+                $writer->save('php://output');
+            }, 'Laporan Penjualan Produk.xlsx', [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]);
+        } else {
+
+            return view('dashboard.report.selling_product', compact('sale'));
         }
         return view('dashboard.report.selling_product', compact('sale'));
     }
@@ -183,7 +286,30 @@ class ReportController extends Controller
                 ->orderBy('date_payment', 'desc')
                 ->get();
         }
-        // return $payment;
+        if (isset($request->export) && $request->export == 'export-pdf') {
+            $store = StoreSetting::first();
+            return view('dashboard.report.cash-flow-cetak', compact('payment', 'store'));
+        } else if (isset($request->export) && $request->export == 'export-excel') {
+            $store = StoreSetting::first();
+            $view = View::make('dashboard.report.cash-flow-cetak', compact('payment', 'store'))->render();
+            // Load HTML ke PhpSpreadsheet
+
+            $reader = new HtmlReader();
+            libxml_use_internal_errors(true);
+            $spreadsheet = $reader->loadFromString($view);
+
+            // Export jadi .xlsx
+            $writer = new Xlsx($spreadsheet);
+
+            return response()->streamDownload(function () use ($writer) {
+                $writer->save('php://output');
+            }, 'Laporan Kas.xlsx', [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]);
+        } else {
+
+            return view('dashboard.report.cash-flow', compact('payment'));
+        }
         return view('dashboard.report.cash-flow', compact('payment'));
     }
 
@@ -237,8 +363,30 @@ class ReportController extends Controller
             $product = $product->groupBy('tanggal');
             $product = collect($product);
         }
-        // $product = Product::with('saleDetail')->where('is_deleted', 'N')->where('is_pajak', 1)->get();
-        // return $product;
+        if (isset($request->export) && $request->export == 'export-pdf') {
+            $store = StoreSetting::first();
+            return view('dashboard.report.product_pajak-cetak', compact('product', 'store'));
+        } else if (isset($request->export) && $request->export == 'export-excel') {
+            $store = StoreSetting::first();
+            $view = View::make('dashboard.report.product_pajak-cetak', compact('product', 'store'))->render();
+            // Load HTML ke PhpSpreadsheet
+
+            $reader = new HtmlReader();
+            libxml_use_internal_errors(true);
+            $spreadsheet = $reader->loadFromString($view);
+
+            // Export jadi .xlsx
+            $writer = new Xlsx($spreadsheet);
+
+            return response()->streamDownload(function () use ($writer) {
+                $writer->save('php://output');
+            }, 'Laporan Produk Pajak.xlsx', [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]);
+        } else {
+
+            return view('dashboard.report.product_pajak', compact('product'));
+        }
         return view('dashboard.report.product_pajak', compact('product'));
     }
 }

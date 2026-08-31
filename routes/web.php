@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MenuController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductInController;
 use App\Http\Controllers\ProductOutController;
@@ -38,7 +39,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'authenticate']);
-Route::get('/logout', [LoginController::class, 'logout']);
+Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -165,7 +166,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [InvoiceController::class, 'index'])->name('invoice.index');
         Route::get('/datatable', [InvoiceController::class, 'datatable'])->name('invoice.datatable');
         Route::get('/show/{id}', [InvoiceController::class, 'show'])->name('invoice.show');
-        Route::post('/print-ulang', [InvoiceController::class, 'prePrint'])->name('invoice.prePrint');
+        Route::post('/print-ulang', [InvoiceController::class, 'printStrukv2'])->name('invoice.prePrint');
     });
 
 
@@ -197,6 +198,17 @@ Route::middleware('auth')->group(function () {
     Route::prefix('configuration')->group(function(){
         Route::prefix('menu')->group(function(){
             Route::get('/', [MenuController::class,'index'])->name('menu.index');
+            Route::get('/menu', [MenuController::class, 'create'])->name('menu.add');
+            Route::get('/getData', [MenuController::class,'edit'])->name('menu.edit');
+            Route::post('/update-s', [MenuController::class,'update'])->name('menu.update');
+            Route::post('/store', [MenuController::class,'store'])->name('menu.store');
+            Route::post('/destroy',[MenuController::class,'destroy'])->name('menu.destroy');
+            Route::post('/menu-update-order', [MenuController::class,'saveOrder'])->name('menu.saveOrder');
+        });
+        Route::prefix('role-menu')->group(function(){
+            Route::get('/', [MenuController::class,'configRole'])->name('menu.role_menu.index');
+            Route::get('/configurasi-role', [MenuController::class,'configRole'])->name('menu.role_menu.config');
+            Route::post('/configurasi-save', [MenuController::class,'saveRole'])->name('menu.role_menu.update');
         });
     });
 });

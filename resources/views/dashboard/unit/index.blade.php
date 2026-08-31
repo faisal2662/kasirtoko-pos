@@ -54,9 +54,9 @@
                                         <td>{{ $item->short }}</td>
                                         <td>{{ $item->type == 'SINGLE' ? 'Tunggal' : 'Banyak' }}</td>
                                         <td><a href="" data-bs-toggle="modal"
-                                                data-bs-target="#editUnit{{ $item->slug }}"
+                                                data-bs-target="#editUnit{{ $item->id }}"
                                                 class="btn btn-warning">Ubah</a>
-                                            || <a data-bs-toggle="modal" data-bs-target="#deleteUnit{{ $item->slug }}"
+                                            || <a data-bs-toggle="modal" data-bs-target="#deleteUnit{{ $item->id }}"
                                                 class="btn btn-danger">Hapus</a></td>
                                     </tr>
                                 @endforeach
@@ -113,7 +113,7 @@
 
     {{-- modal Edit Category --}}
     @foreach ($units as $item)
-        <div class="modal fade" id="editUnit{{ $item->slug }}" tabindex="-1">
+        <div class="modal fade" id="editUnit{{ $item->id }}" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -121,7 +121,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form action="{{ route('unit.edit', $item->slug) }}}}" method="post">
+                        <form action="{{ route('unit.edit', $item->id) }}}}" method="post">
                             @csrf
                             @method('put')
                             <div class="mb-3">
@@ -156,7 +156,7 @@
 
     {{-- modal delete --}}
     @foreach ($units as $item)
-        <div class="modal" id="{{ route('unit.delete', $item->slug) }}}}" tabindex="-1">
+        <div class="modal" id="deleteUnit{{ $item->id }}" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -165,7 +165,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                        <a href="/dashboard/unit-delete/{{ $item->slug }}" class="btn btn-danger">Hapus</a>
+                        <a href="{{ route('unit.delete', $item->id) }}" class="btn btn-danger">Hapus</a>
                     </div>
                 </div>
             </div>
